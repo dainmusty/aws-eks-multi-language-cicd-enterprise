@@ -26,7 +26,7 @@ replicaCount: 2
 ############################################################
 
 image:
-  repository: 123456789012.dkr.ecr.us-east-1.amazonaws.com/polyglot/java-service
+  repository: dainmusty/java-api
 
   # Updated dynamically by GitHub Actions deploy pipeline
   tag: "latest"

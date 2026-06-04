@@ -1,5 +1,5 @@
 image:
-  repository: my-ecr/javascript-api
+  repository: dainmusty/javascript-api
 
 service:
   targetPort: 3000

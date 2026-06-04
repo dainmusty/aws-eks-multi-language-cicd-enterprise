@@ -20,7 +20,7 @@ replicaCount: 2
 ############################################################
 
 image:
-  repository: my-ecr-repo/javascript-api
+  repository: dainmusty/java-api
   tag: staging-latest
   pullPolicy: IfNotPresent
 

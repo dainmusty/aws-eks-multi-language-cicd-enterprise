@@ -72,10 +72,10 @@ keywords:
   - kubernetes
   - helm
 
-home: "https://github.com/your-org/polyglot/javascript-api"
+home: "https://github.com/dainmusty/aws-eks-multi-language-cicd-enterprise.git"
 
 sources:
-  - "https://github.com/your-org/polyglot/javascript-api"
+  - "https://github.com/dainmusty/aws-eks-multi-language-cicd-enterprise.git"
 
 maintainers:
   - name: Platform Engineering Team

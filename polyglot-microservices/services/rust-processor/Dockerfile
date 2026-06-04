@@ -2,7 +2,7 @@
 # STAGE 1 — BUILD
 ############################################################
 
-FROM rust:1.75 AS builder
+FROM rust:1.88 AS builder
 
 WORKDIR /app
 
@@ -65,7 +65,7 @@ WORKDIR /app
 # COPY BINARY
 ############################################################
 
-COPY --from=builder /app/target/release/rust_processor .
+COPY --from=builder /app/target/release/rust-processor .
 
 ############################################################
 # SECURITY

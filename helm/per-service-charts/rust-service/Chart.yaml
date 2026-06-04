@@ -18,10 +18,10 @@ keywords:
   - helm
   - systems-programming
 
-home: "https://github.com/your-org/polyglot/rust-processor"
+home: "https://github.com/dainmusty/aws-eks-multi-language-cicd-enterprise.git"
 
 sources:
-  - "https://github.com/your-org/polyglot/rust-processor"
+  - "https://github.com/dainmusty/aws-eks-multi-language-cicd-enterprise.git"
 
 maintainers:
   - name: Platform Engineering Team

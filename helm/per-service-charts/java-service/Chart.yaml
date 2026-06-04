@@ -35,10 +35,10 @@ keywords:
   - microservice
   - kubernetes
 
-home: "https://github.com/your-org/polyglot/java-service"
+home: "https://github.com/dainmusty/aws-eks-multi-language-cicd-enterprise.git"
 
 sources:
-  - "https://github.com/your-org/polyglot/java-service"
+  - "https://github.com/dainmusty/aws-eks-multi-language-cicd-enterprise.git"
 
 maintainers:
   - name: Platform Engineering Team

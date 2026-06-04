@@ -72,10 +72,10 @@ keywords:
   - platform-engineering
   - devops
 
-home: "https://github.com/your-org/polyglot-microservices"
+home: "https://github.com/dainmusty/aws-eks-multi-language-cicd-enterprise.git"
 
 sources:
-  - "https://github.com/your-org/polyglot-microservices"
+  - "https://github.com/dainmusty/aws-eks-multi-language-cicd-enterprise.git"
 
 maintainers:
   - name: Platform Engineering Team

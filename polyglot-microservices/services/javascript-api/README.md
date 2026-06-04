@@ -38,8 +38,12 @@ npm test
 ### Docker Build
 
 ```bash
-docker build -t javascript-api:1.0.0 .
+docker build -t dainmusty/javascript-api:dev-latest .
+docker push dainmusty/javascript-api:dev-latest
 docker run -p 3000:3000 javascript-api:1.0.0
+
+
+
 ```
 
 ## API Endpoints

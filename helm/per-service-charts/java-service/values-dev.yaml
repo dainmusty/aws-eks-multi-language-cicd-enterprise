@@ -18,7 +18,7 @@ replicaCount: 1
 ############################################################
 
 image:
-  repository: my-ecr-repo/javascript-api
+  repository: dainmusty/java-service
   tag: dev-latest
   pullPolicy: IfNotPresent
 

@@ -48,3 +48,25 @@ terraform.rc
 live/platform/plan.txt
 *.txt
 
+# Node
+node_modules/
+
+# Logs
+*.log
+
+# Environment variables
+.env
+.env.*
+
+# Build artifacts
+dist/
+build/
+target/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

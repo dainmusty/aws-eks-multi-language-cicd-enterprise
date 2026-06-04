@@ -20,7 +20,7 @@ replicaCount: 4
 ############################################################
 
 image:
-  repository: my-ecr-repo/javascript-api
+  repository: dainmusty/javascript-api
   tag: stable
   pullPolicy: IfNotPresent
 

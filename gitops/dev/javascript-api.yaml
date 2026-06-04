@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/your-org/polyglot-microservices
+    repoURL: https://github.com/dainmusty/aws-eks-multi-language-cicd-enterprise.git
     targetRevision: develop
     path: helm/shared-platform-chart/microservice
     helm:

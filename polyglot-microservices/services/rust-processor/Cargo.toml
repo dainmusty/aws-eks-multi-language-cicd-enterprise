@@ -16,5 +16,5 @@ env_logger = "0.11.3"
 tokio-test = "0.4.4"
 
 [[bin]]
-name = "rust_processor"
+name = "rust-processor"
 path = "src/main.rs"
