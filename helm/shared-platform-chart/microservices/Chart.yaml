@@ -1,0 +1,95 @@
+############################################################
+# HELM CHART METADATA
+#
+# PURPOSE:
+# Defines the JavaScript API Helm chart metadata.
+#
+# This chart deploys:
+# - Deployment
+# - Service
+# - Ingress
+# - HPA
+# - PDB
+# - ConfigMaps
+# - Network Policies
+#
+# ENTERPRISE NOTES:
+# - appVersion tracks application image version
+# - version tracks Helm chart version
+############################################################
+
+apiVersion: v2
+
+############################################################
+# CHART NAME
+############################################################
+
+name: microservice
+
+############################################################
+# CHART DESCRIPTION
+############################################################
+
+description: >
+  Shared enterprise Helm chart for polyglot microservices.
+
+############################################################
+# CHART TYPE
+#
+# application = deployable workload
+# library     = reusable helper templates
+############################################################
+
+type: application
+
+############################################################
+# HELM CHART VERSION
+#
+# Increment when:
+# - templates change
+# - values structure changes
+# - Kubernetes manifests change
+############################################################
+
+version: 1.0.0
+
+############################################################
+# APPLICATION VERSION
+#
+# Usually matches Docker image/app release version
+############################################################
+
+appVersion: "1.0.0"
+
+############################################################
+# OPTIONAL METADATA
+############################################################
+
+keywords:
+  - microservice
+  - kubernetes
+  - helm
+  - platform-engineering
+  - devops
+
+home: "https://github.com/your-org/polyglot-microservices"
+
+sources:
+  - "https://github.com/your-org/polyglot-microservices"
+
+maintainers:
+  - name: Platform Engineering Team
+    email: platform@company.com
+
+############################################################
+# KUBERNETES VERSION COMPATIBILITY
+############################################################
+
+kubeVersion: ">=1.28.0"
+
+############################################################
+# ANNOTATIONS
+############################################################
+
+annotations:
+  category: "microservice"

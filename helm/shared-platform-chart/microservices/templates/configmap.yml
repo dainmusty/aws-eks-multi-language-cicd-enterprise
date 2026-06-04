@@ -1,0 +1,52 @@
+############################################################
+# KUBERNETES CONFIGMAP
+#
+# PURPOSE:
+# Stores non-sensitive runtime configuration
+# for the JavaScript API service.
+#
+# ENTERPRISE FEATURES:
+# - Environment-specific config
+# - GitOps friendly
+# - Decoupled application settings
+# - Reusable container images
+############################################################
+
+apiVersion: v1
+
+kind: ConfigMap
+
+metadata:
+
+  name: {{ include "microservice.fullname" . }}
+
+  labels:
+    {{- include "microservice.labels" . | nindent 4 }}
+
+data:
+
+  ##########################################################
+  # APPLICATION ENVIRONMENT VARIABLES
+  ##########################################################
+
+  NODE_ENV: {{ .Values.config.nodeEnv | quote }}
+
+  LOG_LEVEL: {{ .Values.config.logLevel | quote }}
+
+  API_PORT: {{ .Values.config.apiPort | quote }}
+
+  ##########################################################
+  # SERVICE ENDPOINTS
+  ##########################################################
+
+  JAVA_SERVICE_URL: {{ .Values.config.javaServiceUrl | quote }}
+
+  RUST_PROCESSOR_URL: {{ .Values.config.rustProcessorUrl | quote }}
+
+  ##########################################################
+  # FEATURE FLAGS
+  ##########################################################
+
+  ENABLE_METRICS: {{ .Values.config.enableMetrics | quote }}
+
+  ENABLE_TRACING: {{ .Values.config.enableTracing | quote }}

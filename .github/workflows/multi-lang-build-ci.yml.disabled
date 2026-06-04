@@ -1,0 +1,326 @@
+############################################################
+# MULTI-LANGUAGE MATRIX CI
+#
+# PURPOSE:
+# Demonstrates enterprise matrix builds for:
+# - JavaScript (Node.js)
+# - Java (Spring Boot)
+# - Rust (Actix)
+#
+# NOTE:
+# This workflow is OPTIONAL.
+#
+# For production:
+# - Use service-specific pipelines
+#   javascript-ci.yml
+#   java-ci.yml
+#   rust-ci.yml
+#
+# This workflow exists primarily for:
+# - Learning
+# - Demonstrating matrix builds
+# - Recruiter portfolio value
+#
+############################################################
+
+name: Multi-Language Matrix CI
+
+on:
+
+  push:
+
+    branches:
+      - develop
+      - main
+
+  pull_request:
+
+    branches:
+      - main
+
+############################################################
+# DETECT WHICH SERVICES CHANGED
+############################################################
+
+jobs:
+
+  detect-changes:
+
+    name: Detect Changed Services
+
+    runs-on: ubuntu-latest
+
+    outputs:
+
+      javascript: ${{ steps.filter.outputs.javascript }}
+      java: ${{ steps.filter.outputs.java }}
+      rust: ${{ steps.filter.outputs.rust }}
+
+    steps:
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Detect Changed Paths
+        id: filter
+        uses: dorny/paths-filter@v3
+
+        with:
+
+          filters: |
+
+            javascript:
+              - 'services/javascript-api/**'
+
+            java:
+              - 'services/java-service/**'
+
+            rust:
+              - 'services/rust-processor/**'
+
+############################################################
+# SECURITY SCANNING
+#
+# Reuses centralized security workflow
+#
+# develop  -> comprehensive
+# main     -> full
+############################################################
+
+  security-scan:
+
+    name: Security Scanning
+
+    needs: detect-changes
+
+    uses: ./.github/workflows/security-scanning.yml
+
+    with:
+
+      scan-level: ${{ github.ref == 'refs/heads/main' && 'full' || 'comprehensive' }}
+
+############################################################
+# BUILD CHANGED SERVICES IN PARALLEL
+############################################################
+
+  build-services:
+
+    name: Build Services
+
+    needs:
+      - detect-changes
+      - security-scan
+
+    runs-on: ubuntu-latest
+
+    permissions:
+
+      contents: read
+      security-events: write
+      id-token: write
+
+    strategy:
+
+      fail-fast: false
+
+      matrix:
+
+        service:
+
+          ##################################################
+          # JAVASCRIPT
+          ##################################################
+
+          - name: javascript-api
+
+            changed: javascript
+
+            service_path: services/javascript-api
+
+            dockerfile: services/javascript-api/Dockerfile
+
+            ecr_repo: polyglot/javascript-api
+
+          ##################################################
+          # JAVA
+          ##################################################
+
+          - name: java-service
+
+            changed: java
+
+            service_path: services/java-service
+
+            dockerfile: services/java-service/Dockerfile
+
+            ecr_repo: polyglot/java-service
+
+          ##################################################
+          # RUST
+          ##################################################
+
+          - name: rust-processor
+
+            changed: rust
+
+            service_path: services/rust-processor
+
+            dockerfile: services/rust-processor/Dockerfile
+
+            ecr_repo: polyglot/rust-processor
+
+    ########################################################
+    # BUILD ONLY CHANGED SERVICES
+    ########################################################
+
+    if: |
+      (matrix.service.changed == 'javascript' && needs.detect-changes.outputs.javascript == 'true') ||
+      (matrix.service.changed == 'java' && needs.detect-changes.outputs.java == 'true') ||
+      (matrix.service.changed == 'rust' && needs.detect-changes.outputs.rust == 'true')
+
+    env:
+
+      AWS_REGION: us-east-1
+
+    steps:
+
+      ######################################################
+      # CHECKOUT
+      ######################################################
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      ######################################################
+      # AWS AUTH
+      ######################################################
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+
+        with:
+
+          role-to-assume: ${{ secrets.AWS_GITHUB_ROLE_ARN }}
+
+          aws-region: ${{ env.AWS_REGION }}
+
+      ######################################################
+      # LOGIN TO ECR
+      ######################################################
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      ######################################################
+      # BUILD IMAGE
+      ######################################################
+
+      - name: Build Docker Image
+
+        run: |
+
+          docker build \
+            -f ${{ matrix.service.dockerfile }} \
+            -t ${{ matrix.service.name }}:${{ github.sha }} \
+            ${{ matrix.service.service_path }}
+
+      ######################################################
+      # IMAGE SECURITY SCAN
+      ######################################################
+
+      - name: Trivy Container Scan
+
+        uses: aquasecurity/trivy-action@0.28.0
+
+        with:
+
+          image-ref: ${{ matrix.service.name }}:${{ github.sha }}
+
+          format: table
+
+          severity: HIGH,CRITICAL
+
+          ignore-unfixed: true
+
+          exit-code: "1"
+
+      ######################################################
+      # TAG IMAGE
+      ######################################################
+
+      - name: Tag Docker Image
+
+        run: |
+
+          docker tag \
+            ${{ matrix.service.name }}:${{ github.sha }} \
+            ${{ steps.login-ecr.outputs.registry }}/${{ matrix.service.ecr_repo }}:${{ github.sha }}
+
+          docker tag \
+            ${{ matrix.service.name }}:${{ github.sha }} \
+            ${{ steps.login-ecr.outputs.registry }}/${{ matrix.service.ecr_repo }}:latest
+
+      ######################################################
+      # PUSH IMAGE
+      ######################################################
+
+      - name: Push Docker Image
+
+        run: |
+
+          docker push \
+            ${{ steps.login-ecr.outputs.registry }}/${{ matrix.service.ecr_repo }}:${{ github.sha }}
+
+          docker push \
+            ${{ steps.login-ecr.outputs.registry }}/${{ matrix.service.ecr_repo }}:latest
+
+      ######################################################
+      # BUILD SUMMARY
+      ######################################################
+
+      - name: Build Summary
+
+        run: |
+
+          echo "======================================="
+          echo "Service Built Successfully"
+          echo "======================================="
+          echo "Service : ${{ matrix.service.name }}"
+          echo "Commit  : ${{ github.sha }}"
+          echo "Branch  : ${{ github.ref_name }}"
+          echo "======================================="
+
+############################################################
+# PIPELINE SUMMARY
+############################################################
+
+  pipeline-summary:
+
+    name: Matrix CI Summary
+
+    needs:
+      - detect-changes
+      - security-scan
+      - build-services
+
+    if: always()
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Pipeline Results
+
+        run: |
+
+          echo "====================================="
+          echo "MULTI-LANGUAGE CI SUMMARY"
+          echo "====================================="
+          echo "JavaScript Changed : ${{ needs.detect-changes.outputs.javascript }}"
+          echo "Java Changed       : ${{ needs.detect-changes.outputs.java }}"
+          echo "Rust Changed       : ${{ needs.detect-changes.outputs.rust }}"
+          echo "====================================="
+          echo "Security Status    : ${{ needs.security-scan.result }}"
+          echo "Build Status       : ${{ needs.build-services.result }}"
+          echo "====================================="

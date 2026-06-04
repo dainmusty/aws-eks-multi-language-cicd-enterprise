@@ -1,0 +1,26 @@
+image:
+  repository: my-ecr/java-service
+
+service:
+  targetPort: 8080
+
+health:
+  endpoint: /actuator/health
+
+env:
+  SPRING_PROFILES_ACTIVE: production
+
+config:
+  javaOpts: "-Xms256m -Xmx512m"
+
+resources:
+  requests:
+    cpu: "300m"
+    memory: "512Mi"
+
+  limits:
+    cpu: "1"
+    memory: "1Gi"
+
+autoscaling:
+  targetCPUUtilizationPercentage: 65

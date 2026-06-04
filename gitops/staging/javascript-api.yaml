@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: javascript-api-staging
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/your-org/polyglot-microservices
+    targetRevision: staging
+    path: helm/shared-platform-chart/microservice
+    helm:
+      valueFiles:
+        - values-javascript.yaml
+        - values-staging.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: polyglot-staging
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

@@ -1,0 +1,61 @@
+############################################################
+# KUBERNETES SERVICE
+#
+# PURPOSE:
+# Exposes the JavaScript API pods internally
+# within the Kubernetes cluster.
+#
+# ENTERPRISE FEATURES:
+# - Stable service discovery
+# - Label-based pod selection
+# - Configurable service types
+# - GitOps compatible
+############################################################
+
+apiVersion: v1
+
+kind: Service
+
+metadata:
+
+  name: {{ include "java-service.fullname" . }}
+
+  labels:
+    {{- include "java-service.labels" . | nindent 4 }}
+
+spec:
+
+  ##########################################################
+  # SERVICE TYPE
+  #
+  # Common types:
+  #
+  # ClusterIP   -> internal only
+  # NodePort    -> external via node port
+  # LoadBalancer -> cloud load balancer
+  ##########################################################
+
+  type: {{ .Values.service.type }}
+
+  ##########################################################
+  # PORT CONFIGURATION
+  ##########################################################
+
+  ports:
+
+    - port: {{ .Values.service.port }}
+
+      targetPort: {{ .Values.service.targetPort }}
+
+      protocol: TCP
+
+      name: http
+
+  ##########################################################
+  # POD SELECTORS
+  #
+  # Routes traffic to matching pods.
+  ##########################################################
+
+  selector:
+    {{- include "java-service.selectorLabels" . | nindent 4 }}

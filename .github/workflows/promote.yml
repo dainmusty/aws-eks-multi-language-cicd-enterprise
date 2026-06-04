@@ -1,0 +1,117 @@
+name: Promote Release
+
+on:
+
+  workflow_dispatch:
+
+    inputs:
+
+      service:
+
+        description: "Microservice to promote"
+
+        required: true
+
+        type: choice
+
+        options:
+          - javascript-api
+          - java-service
+          - rust-processor
+
+      source_environment:
+
+        description: "Source Environment"
+
+        required: true
+
+        type: choice
+
+        options:
+          - dev
+          - staging
+
+      target_environment:
+
+        description: "Target Environment"
+
+        required: true
+
+        type: choice
+
+        options:
+          - staging
+          - production
+
+      image_tag:
+
+        description: "Image Tag"
+
+        required: true
+
+permissions:
+
+  contents: write
+
+jobs:
+
+  promote:
+
+    runs-on: ubuntu-latest
+
+    environment:
+
+      name: ${{ github.event.inputs.target_environment }}
+
+    steps:
+
+      - name: Checkout Repository
+
+        uses: actions/checkout@v4
+
+      - name: Determine GitOps File
+
+        id: file
+
+        run: |
+
+          echo "FILE=gitops/${{ github.event.inputs.target_environment }}/${{ github.event.inputs.service }}.yaml" >> $GITHUB_OUTPUT
+
+      - name: Update Image Tag
+
+        run: |
+
+          sed -i \
+          "s/tag:.*/tag: ${{
+          github.event.inputs.image_tag
+          }}/" \
+          ${{ steps.file.outputs.FILE }}
+
+      - name: Commit Promotion
+
+        run: |
+
+          git config user.name "github-actions"
+
+          git config user.email "github-actions@github.com"
+
+          git add .
+
+          git commit -m \
+          "Promote ${{ github.event.inputs.service }} to ${{ github.event.inputs.target_environment }} (${{
+          github.event.inputs.image_tag }})" \
+          || echo "No changes"
+
+      - name: Push Promotion
+
+        run: git push
+
+      - name: Promotion Summary
+
+        run: |
+
+          echo "Promotion Complete"
+          echo "Service: ${{ github.event.inputs.service }}"
+          echo "Source: ${{ github.event.inputs.source_environment }}"
+          echo "Target: ${{ github.event.inputs.target_environment }}"
+          echo "Image: ${{ github.event.inputs.image_tag }}"

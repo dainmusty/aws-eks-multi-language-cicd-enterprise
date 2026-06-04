@@ -1,0 +1,274 @@
+############################################################
+# RUST MICROSERVICE CI
+#
+# PURPOSE:
+# - Build Rust application
+# - Run tests
+# - Run linting
+# - Build Docker image
+# - Push image to ECR
+#
+# SECURITY:
+# Delegated to reusable workflow:
+# .github/workflows/security-scanning.yml
+#
+# ENTERPRISE DESIGN:
+# - Cargo caching
+# - Branch-aware security
+# - OIDC authentication
+# - Immutable image tags
+############################################################
+
+name: Rust CI
+
+############################################################
+# TRIGGERS
+############################################################
+
+on:
+
+  push:
+
+    branches:
+      - develop
+      - staging
+      - main
+
+    paths:
+      - "services/rust-processor/**"
+
+  pull_request:
+
+    branches:
+      - main
+
+    paths:
+      - "services/rust-processor/**"
+
+############################################################
+# GLOBAL VARIABLES
+############################################################
+
+env:
+
+  AWS_REGION: us-east-1
+
+  ECR_REPOSITORY: polyglot/rust-processor
+
+  SERVICE_PATH: services/rust-processor
+
+############################################################
+# JOBS
+############################################################
+
+jobs:
+
+############################################################
+# DETERMINE SECURITY LEVEL
+############################################################
+
+  determine-scan-level:
+
+    runs-on: ubuntu-latest
+
+    outputs:
+
+      scan-level: ${{ steps.level.outputs.scan-level }}
+
+    steps:
+
+      - name: Determine Scan Level
+
+        id: level
+
+        run: |
+
+          if [[ "${GITHUB_REF}" == "refs/heads/main" ]]; then
+            echo "scan-level=full" >> $GITHUB_OUTPUT
+
+          elif [[ "${GITHUB_REF}" == "refs/heads/staging" ]]; then
+            echo "scan-level=comprehensive" >> $GITHUB_OUTPUT
+
+          else
+            echo "scan-level=fast" >> $GITHUB_OUTPUT
+          fi
+
+############################################################
+# SECURITY WORKFLOW
+############################################################
+
+  security:
+
+    needs: determine-scan-level
+
+    uses: ./.github/workflows/security-scanning.yml
+
+    with:
+
+      scan-level: ${{ needs.determine-scan-level.outputs.scan-level }}
+
+    secrets: inherit
+
+############################################################
+# BUILD / TEST / PACKAGE / PUSH
+############################################################
+
+  build-test-package-push:
+
+    needs: security
+
+    runs-on: ubuntu-latest
+
+    permissions:
+
+      contents: read
+
+      id-token: write
+
+    steps:
+
+############################################################
+# CHECKOUT
+############################################################
+
+      - name: Checkout Repository
+
+        uses: actions/checkout@v4
+
+############################################################
+# RUST TOOLCHAIN
+############################################################
+
+      - name: Setup Rust
+
+        uses: dtolnay/rust-toolchain@stable
+
+############################################################
+# CACHE CARGO
+############################################################
+
+      - name: Cache Cargo Dependencies
+
+        uses: actions/cache@v4
+
+        with:
+
+          path: |
+            ~/.cargo/bin
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+############################################################
+# FORMAT CHECK
+############################################################
+
+      - name: Rust Format Check
+
+        working-directory: ${{ env.SERVICE_PATH }}
+
+        run: cargo fmt --check
+
+############################################################
+# CLIPPY LINTING
+############################################################
+
+      - name: Run Clippy
+
+        working-directory: ${{ env.SERVICE_PATH }}
+
+        run: cargo clippy -- -D warnings
+
+############################################################
+# UNIT TESTS
+############################################################
+
+      - name: Run Unit Tests
+
+        working-directory: ${{ env.SERVICE_PATH }}
+
+        run: cargo test
+
+############################################################
+# RELEASE BUILD
+############################################################
+
+      - name: Build Release Binary
+
+        working-directory: ${{ env.SERVICE_PATH }}
+
+        run: cargo build --release
+
+############################################################
+# AWS AUTHENTICATION
+############################################################
+
+      - name: Configure AWS Credentials
+
+        uses: aws-actions/configure-aws-credentials@v4
+
+        with:
+
+          role-to-assume: ${{ secrets.AWS_GITHUB_ROLE_ARN }}
+
+          aws-region: ${{ env.AWS_REGION }}
+
+############################################################
+# LOGIN TO ECR
+############################################################
+
+      - name: Login to Amazon ECR
+
+        id: login-ecr
+
+        uses: aws-actions/amazon-ecr-login@v2
+
+############################################################
+# BUILD IMAGE
+############################################################
+
+      - name: Build Docker Image
+
+        working-directory: ${{ env.SERVICE_PATH }}
+
+        run: |
+
+          docker build \
+            -t ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }} \
+            -t ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest \
+            .
+
+############################################################
+# PUSH IMAGE
+############################################################
+
+      - name: Push Docker Image
+
+        run: |
+
+          docker push \
+            ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+
+          docker push \
+            ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest
+
+############################################################
+# BUILD ARTIFACTS
+############################################################
+
+      - name: Upload Build Artifacts
+
+        if: always()
+
+        uses: actions/upload-artifact@v4
+
+        with:
+
+          name: rust-build-artifacts
+
+          path: |
+            services/rust-processor/target/release/
+
+          retention-days: 7

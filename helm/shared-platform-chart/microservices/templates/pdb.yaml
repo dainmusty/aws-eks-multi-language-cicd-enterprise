@@ -1,0 +1,50 @@
+############################################################
+# POD DISRUPTION BUDGET
+#
+# PURPOSE:
+# Protects the application from excessive pod
+# disruptions during:
+# - node maintenance
+# - cluster upgrades
+# - autoscaler scale-down
+# - voluntary evictions
+#
+# ENTERPRISE FEATURES:
+# - High availability protection
+# - Rolling upgrade safety
+# - Cluster resilience
+############################################################
+
+{{- if .Values.podDisruptionBudget.enabled }}
+
+apiVersion: policy/v1
+
+kind: PodDisruptionBudget
+
+metadata:
+
+  name: {{ include "microservice.fullname" . }}
+
+  labels:
+    {{- include "microservice.labels" . | nindent 4 }}
+
+spec:
+
+  ##########################################################
+  # MINIMUM AVAILABLE PODS
+  #
+  # Guarantees at least this many pods remain running.
+  ##########################################################
+
+  minAvailable: {{ .Values.podDisruptionBudget.minAvailable }}
+
+  ##########################################################
+  # TARGET PODS
+  ##########################################################
+
+  selector:
+
+    matchLabels:
+      {{- include "microservice.selectorLabels" . | nindent 6 }}
+
+{{- end }}

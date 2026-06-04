@@ -1,0 +1,248 @@
+############################################################
+# JAVA MICROSERVICE CI
+#
+# PURPOSE:
+# - Build Spring Boot application
+# - Run tests
+# - Package JAR
+# - Build Docker image
+# - Push image to ECR
+#
+# SECURITY:
+# Delegated to reusable workflow:
+# .github/workflows/security-scanning.yml
+#
+# ENTERPRISE DESIGN:
+# - OIDC authentication
+# - Maven dependency caching
+# - Immutable image tags
+# - Branch-aware security
+############################################################
+
+name: Java CI
+
+############################################################
+# TRIGGERS
+############################################################
+
+on:
+
+  push:
+
+    branches:
+      - develop
+      - staging
+      - main
+
+    paths:
+      - "services/java-service/**"
+
+  pull_request:
+
+    branches:
+      - main
+
+    paths:
+      - "services/java-service/**"
+
+############################################################
+# GLOBAL VARIABLES
+############################################################
+
+env:
+
+  AWS_REGION: us-east-1
+
+  ECR_REPOSITORY: polyglot/java-service
+
+  SERVICE_PATH: services/java-service
+
+############################################################
+# JOBS
+############################################################
+
+jobs:
+
+############################################################
+# DETERMINE SECURITY LEVEL
+############################################################
+
+  determine-scan-level:
+
+    runs-on: ubuntu-latest
+
+    outputs:
+
+      scan-level: ${{ steps.level.outputs.scan-level }}
+
+    steps:
+
+      - name: Determine Scan Level
+
+        id: level
+
+        run: |
+
+          if [[ "${GITHUB_REF}" == "refs/heads/main" ]]; then
+            echo "scan-level=full" >> $GITHUB_OUTPUT
+
+          elif [[ "${GITHUB_REF}" == "refs/heads/staging" ]]; then
+            echo "scan-level=comprehensive" >> $GITHUB_OUTPUT
+
+          else
+            echo "scan-level=fast" >> $GITHUB_OUTPUT
+          fi
+
+############################################################
+# SECURITY WORKFLOW
+############################################################
+
+  security:
+
+    needs: determine-scan-level
+
+    uses: ./.github/workflows/security-scanning.yml
+
+    with:
+
+      scan-level: ${{ needs.determine-scan-level.outputs.scan-level }}
+
+    secrets: inherit
+
+############################################################
+# BUILD / TEST / PACKAGE / PUSH
+############################################################
+
+  build-test-package-push:
+
+    needs: security
+
+    runs-on: ubuntu-latest
+
+    permissions:
+
+      contents: read
+
+      id-token: write
+
+    steps:
+
+############################################################
+# CHECKOUT
+############################################################
+
+      - name: Checkout Repository
+
+        uses: actions/checkout@v4
+
+############################################################
+# JAVA SETUP
+############################################################
+
+      - name: Setup Java
+
+        uses: actions/setup-java@v4
+
+        with:
+
+          distribution: temurin
+
+          java-version: "17"
+
+          cache: maven
+
+############################################################
+# BUILD APPLICATION
+############################################################
+
+      - name: Build Application
+
+        working-directory: ${{ env.SERVICE_PATH }}
+
+        run: |
+
+          mvn clean verify
+
+############################################################
+# PACKAGE JAR
+############################################################
+
+      - name: Package Spring Boot JAR
+
+        working-directory: ${{ env.SERVICE_PATH }}
+
+        run: |
+
+          mvn package -DskipTests
+
+############################################################
+# AWS AUTHENTICATION
+############################################################
+
+      - name: Configure AWS Credentials
+
+        uses: aws-actions/configure-aws-credentials@v4
+
+        with:
+
+          role-to-assume: ${{ secrets.AWS_GITHUB_ROLE_ARN }}
+
+          aws-region: ${{ env.AWS_REGION }}
+
+############################################################
+# LOGIN TO ECR
+############################################################
+
+      - name: Login to Amazon ECR
+
+        id: login-ecr
+
+        uses: aws-actions/amazon-ecr-login@v2
+
+############################################################
+# BUILD IMAGE
+############################################################
+
+      - name: Build Docker Image
+
+        working-directory: ${{ env.SERVICE_PATH }}
+
+        run: |
+
+          docker build \
+            -t ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }} \
+            -t ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest \
+            .
+
+############################################################
+# PUSH IMAGE
+############################################################
+
+      - name: Push Docker Image
+
+        run: |
+
+          docker push \
+            ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+
+          docker push \
+            ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest
+
+############################################################
+# BUILD ARTIFACTS
+############################################################
+
+      - name: Upload Build Artifacts
+
+        if: always()
+
+        uses: actions/upload-artifact@v4
+
+        with:
+
+          name: java-build-artifacts
+
+          path: |
+            services/java-service/target/*.jar
+
+          retention-days: 7

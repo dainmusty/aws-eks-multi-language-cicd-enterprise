@@ -1,0 +1,91 @@
+############################################################
+# KUBERNETES INGRESS
+#
+# PURPOSE:
+# Exposes the JavaScript API externally
+# through the AWS Load Balancer Controller.
+#
+# ENTERPRISE FEATURES:
+# - ALB integration
+# - HTTPS ready
+# - Host-based routing
+# - Health checks
+# - Internet/internal support
+############################################################
+
+{{- if .Values.ingress.enabled }}
+
+apiVersion: networking.k8s.io/v1
+
+kind: Ingress
+
+metadata:
+
+  name: {{ include "rust-service.fullname" . }}
+
+  labels:
+    {{- include "rust-service.labels" . | nindent 4 }}
+
+  ##########################################################
+  # ALB ANNOTATIONS
+  ##########################################################
+
+  annotations:
+
+    {{- with .Values.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+
+spec:
+
+  ##########################################################
+  # INGRESS CLASS
+  ##########################################################
+
+  ingressClassName: {{ .Values.ingress.className }}
+
+  ##########################################################
+  # TLS CONFIGURATION
+  ##########################################################
+
+  {{- if .Values.ingress.tls }}
+
+  tls:
+    {{- toYaml .Values.ingress.tls | nindent 4 }}
+
+  {{- end }}
+
+  ##########################################################
+  # HOST RULES
+  ##########################################################
+
+  rules:
+
+    {{- range .Values.ingress.hosts }}
+
+    - host: {{ .host | quote }}
+
+      http:
+
+        paths:
+
+          {{- range .paths }}
+
+          - path: {{ .path }}
+
+            pathType: {{ .pathType }}
+
+            backend:
+
+              service:
+
+                name: {{ include "rust-service.fullname" $ }}
+
+                port:
+                  number: {{ $.Values.service.port }}
+
+          {{- end }}
+
+    {{- end }}
+
+{{- end }}

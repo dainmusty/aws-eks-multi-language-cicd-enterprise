@@ -1,0 +1,23 @@
+image:
+  repository: my-ecr/javascript-api
+
+service:
+  targetPort: 3000
+
+health:
+  endpoint: /actuator/health
+
+env:
+  NODE_ENV: production
+
+config:
+  logLevel: info
+
+resources:
+  requests:
+    cpu: "200m"
+    memory: "256Mi"
+
+  limits:
+    cpu: "500m"
+    memory: "512Mi"

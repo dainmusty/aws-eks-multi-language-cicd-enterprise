@@ -1,0 +1,224 @@
+############################################################
+# KUBERNETES DEPLOYMENT
+#
+# PURPOSE:
+# Deploys the JavaScript API microservice.
+#
+# ENTERPRISE FEATURES:
+# - Rolling updates
+# - Readiness/liveness probes
+# - Resource controls
+# - Security hardening
+# - ConfigMap + Secret support
+# - Autoscaling compatibility
+############################################################
+
+apiVersion: apps/v1
+
+kind: Deployment
+
+metadata:
+
+  name: {{ include "rust-service.fullname" . }}
+
+  labels:
+    {{- include "rust-service.labels" . | nindent 4 }}
+
+spec:
+
+  ##########################################################
+  # REPLICA COUNT
+  #
+  # Ignored if HPA enabled.
+  ##########################################################
+
+  {{- if not .Values.autoscaling.enabled }}
+
+  replicas: {{ .Values.replicaCount }}
+
+  {{- end }}
+
+  ##########################################################
+  # POD SELECTORS
+  ##########################################################
+
+  selector:
+    matchLabels:
+      {{- include "rust-service.selectorLabels" . | nindent 6 }}
+
+  ##########################################################
+  # DEPLOYMENT STRATEGY
+  #
+  # Rolling updates:
+  # - zero downtime deployments
+  ##########################################################
+
+  strategy:
+
+    type: RollingUpdate
+
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 25%
+
+  ##########################################################
+  # POD TEMPLATE
+  ##########################################################
+
+  template:
+
+    metadata:
+
+      labels:
+        {{- include "rust-service.selectorLabels" . | nindent 8 }}
+
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+
+      annotations:
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+
+    spec:
+
+      ######################################################
+      # SERVICE ACCOUNT
+      ######################################################
+
+      serviceAccountName: {{ include "rust-service.serviceAccountName" . }}
+
+      ######################################################
+      # IMAGE PULL SECRETS
+      ######################################################
+
+      {{- with .Values.imagePullSecrets }}
+
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+
+      {{- end }}
+
+      ######################################################
+      # POD SECURITY CONTEXT
+      ######################################################
+
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+
+      ######################################################
+      # CONTAINERS
+      ######################################################
+
+      containers:
+
+        - name: {{ .Chart.Name }}
+
+          ##################################################
+          # CONTAINER IMAGE
+          ##################################################
+
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+
+          ##################################################
+          # CONTAINER SECURITY
+          ##################################################
+
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+
+          ##################################################
+          # CONTAINER PORTS
+          ##################################################
+
+          ports:
+
+            - name: http
+              containerPort: {{ .Values.service.targetPort }}
+              protocol: TCP
+
+          ##################################################
+          # ENVIRONMENT VARIABLES
+          ##################################################
+
+          env:
+
+            {{- range $key, $value := .Values.env }}
+
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+
+            {{- end }}
+
+          ##################################################
+          # CONFIGMAP ENV VARIABLES
+          ##################################################
+
+          envFrom:
+
+            - configMapRef:
+                name: {{ include "rust-service.fullname" . }}
+
+            - secretRef:
+                name: {{ include "rust-service.fullname" . }}
+
+          ##################################################
+          # LIVENESS PROBE
+          #
+          # Detects dead containers
+          ##################################################
+
+          livenessProbe:
+            {{- toYaml .Values.livenessProbe | nindent 12 }}
+
+          ##################################################
+          # READINESS PROBE
+          #
+          # Determines if pod receives traffic
+          ##################################################
+
+          readinessProbe:
+            {{- toYaml .Values.readinessProbe | nindent 12 }}
+
+          ##################################################
+          # RESOURCE LIMITS
+          ##################################################
+
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+
+      ######################################################
+      # NODE SELECTION
+      ######################################################
+
+      {{- with .Values.nodeSelector }}
+
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+
+      {{- end }}
+
+      ######################################################
+      # AFFINITY RULES
+      ######################################################
+
+      {{- with .Values.affinity }}
+
+      affinity:
+        {{- toYaml . | nindent 8 }}
+
+      {{- end }}
+
+      ######################################################
+      # TOLERATIONS
+      ######################################################
+
+      {{- with .Values.tolerations }}
+
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+
+      {{- end }}

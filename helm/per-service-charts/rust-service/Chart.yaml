@@ -1,0 +1,33 @@
+apiVersion: v2
+
+name: rust-processor
+
+description: >
+  Enterprise Helm chart for the Rust processor microservice.
+
+type: application
+
+version: 1.0.0
+
+appVersion: "1.0.0"
+
+keywords:
+  - rust
+  - microservice
+  - kubernetes
+  - helm
+  - systems-programming
+
+home: "https://github.com/your-org/polyglot/rust-processor"
+
+sources:
+  - "https://github.com/your-org/polyglot/rust-processor"
+
+maintainers:
+  - name: Platform Engineering Team
+    email: platform@company.com
+
+kubeVersion: ">=1.28.0"
+
+annotations:
+  category: "rust-processor"

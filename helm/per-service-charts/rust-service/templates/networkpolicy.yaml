@@ -1,0 +1,124 @@
+############################################################
+# KUBERNETES NETWORK POLICY
+#
+# PURPOSE:
+# Restricts pod-to-pod communication using
+# zero-trust networking principles.
+#
+# ENTERPRISE FEATURES:
+# - East-west traffic control
+# - Namespace isolation
+# - Least privilege networking
+# - Kubernetes microsegmentation
+############################################################
+
+{{- if .Values.networkPolicy.enabled }}
+
+apiVersion: networking.k8s.io/v1
+
+kind: NetworkPolicy
+
+metadata:
+
+  name: {{ include "rust-service.fullname" . }}
+
+  labels:
+    {{- include "rust-service.labels" . | nindent 4 }}
+
+spec:
+
+  ##########################################################
+  # TARGET PODS
+  ##########################################################
+
+  podSelector:
+
+    matchLabels:
+      {{- include "rust-service.selectorLabels" . | nindent 6 }}
+
+  ##########################################################
+  # POLICY TYPES
+  ##########################################################
+
+  policyTypes:
+
+    - Ingress
+
+    - Egress
+
+  ##########################################################
+  # INGRESS RULES
+  #
+  # Allow traffic ONLY from:
+  # - ingress controller
+  # - same namespace services
+  ##########################################################
+
+  ingress:
+
+    ########################################################
+    # ALLOW FROM INGRESS CONTROLLER
+    ########################################################
+
+    - from:
+
+        - namespaceSelector:
+
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+
+      ports:
+
+        - protocol: TCP
+          port: {{ .Values.service.targetPort }}
+
+    ########################################################
+    # ALLOW SAME NAMESPACE COMMUNICATION
+    ########################################################
+
+    - from:
+
+        - podSelector: {}
+
+      ports:
+
+        - protocol: TCP
+          port: {{ .Values.service.targetPort }}
+
+  ##########################################################
+  # EGRESS RULES
+  ##########################################################
+
+  egress:
+
+    ########################################################
+    # ALLOW DNS RESOLUTION
+    ########################################################
+
+    - to:
+
+        - namespaceSelector:
+
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+
+      ports:
+
+        - protocol: UDP
+          port: 53
+
+        - protocol: TCP
+          port: 53
+
+    ########################################################
+    # ALLOW HTTPS OUTBOUND
+    ########################################################
+
+    - to: []
+
+      ports:
+
+        - protocol: TCP
+          port: 443
+
+{{- end }}

@@ -1,0 +1,55 @@
+############################################################
+# HELM TEST
+#
+# PURPOSE:
+# Validates that the JavaScript API service
+# is reachable after deployment.
+#
+# ENTERPRISE FEATURES:
+# - Post-deployment verification
+# - Service connectivity testing
+# - GitOps validation
+# - Release confidence
+############################################################
+
+apiVersion: v1
+
+kind: Pod
+
+metadata:
+
+  name: "{{ include "rust-service.fullname" . }}-test"
+
+  labels:
+    {{- include "rust-service.labels" . | nindent 4 }}
+
+  ##########################################################
+  # HELM TEST HOOK
+  ##########################################################
+
+  annotations:
+    "helm.sh/hook": test
+
+spec:
+
+  ##########################################################
+  # TEST CONTAINER
+  ##########################################################
+
+  containers:
+
+    - name: wget
+
+      image: busybox
+
+      command:
+
+        - wget
+
+        - "{{ include "rust-service.fullname" . }}:{{ .Values.service.port }}/health"
+
+  ##########################################################
+  # TEST SHOULD EXIT AFTER COMPLETION
+  ##########################################################
+
+  restartPolicy: Never

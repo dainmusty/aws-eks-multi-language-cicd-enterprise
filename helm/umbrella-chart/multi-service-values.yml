@@ -1,0 +1,53 @@
+# # This is the values file for the umbrella chart that deploys multiple services.
+# # Each service has its own section with specific configurations.
+# # will work on this later, for now just a placeholder to show how to structure values for multiple services in an umbrella chart.
+# # Global values
+# global:
+# imageRegistry: myregistry.io
+# imageTag: latest
+# environment: production
+
+# # JavaScript API
+# javascriptApi:
+# enabled:true
+# replicaCount:3
+# image:
+# repository: javascript-api
+# tag: abc123f
+# resources:
+# requests:
+# memory:"256Mi"
+# cpu:"250m"
+# limits:
+# memory:"512Mi"
+# cpu:"500m"
+
+# # Java Service
+# javaService:
+# enabled:true
+# replicaCount:2
+# image:
+# repository: java-service
+# tag: def456g
+# resources:
+# requests:
+# memory:"512Mi"
+# cpu:"500m"
+# limits:
+# memory:"1Gi"
+# cpu:"1000m"
+
+# # Rust Processor
+# rustProcessor:
+# enabled:true
+# replicaCount:2
+# image:
+# repository: rust-processor
+# tag: ghi789h
+# resources:
+# requests:
+# memory:"128Mi"
+# cpu:"100m"
+# limits:
+# memory:"256Mi"
+# cpu:"200m"

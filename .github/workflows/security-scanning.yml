@@ -1,0 +1,303 @@
+############################################################
+# SECURITY SCANNING WORKFLOW
+#
+# PURPOSE
+# Centralized reusable security workflow.
+#
+# Called from:
+# - javascript-ci.yml
+# - java-ci.yml
+# - rust-ci.yml
+# - multi-language-ci.yml
+#
+# SCAN LEVELS
+#
+# fast
+#   - Gitleaks
+#   - npm audit critical
+#   - lint
+#
+# comprehensive
+#   - Semgrep
+#   - Dependency scans
+#   - IaC scans
+#   - Helm lint
+#
+# full
+#   - Trivy repository scan
+#   - SBOM generation
+#   - Production compliance checks
+#
+############################################################
+
+name: Security Scanning
+
+on:
+
+  workflow_call:
+
+    inputs:
+
+      scan-level:
+
+        required: true
+
+        type: string
+
+############################################################
+# GLOBAL VARIABLES
+############################################################
+
+env:
+
+  TERRAFORM_PATH: terraform
+
+############################################################
+# FAST SECURITY
+############################################################
+
+jobs:
+
+  fast-security:
+
+    name: Fast Security Checks
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      ######################################################
+      # Checkout
+      ######################################################
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      ######################################################
+      # Secret Detection
+      ######################################################
+
+      - name: Gitleaks Scan
+
+        uses: gitleaks/gitleaks-action@v2
+
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      ######################################################
+      # Node Setup
+      ######################################################
+
+      - name: Setup Node
+
+        uses: actions/setup-node@v4
+
+        with:
+          node-version: "20"
+
+      ######################################################
+      # Critical Dependency Scan
+      ######################################################
+
+      - name: NPM Audit Critical
+
+        working-directory: services/javascript-api
+
+        run: |
+          npm ci
+          npm audit --audit-level=critical
+ 
+
+############################################################
+# COMPREHENSIVE SECURITY
+############################################################
+
+  comprehensive-security:
+
+    if: >
+      inputs.scan-level == 'comprehensive' ||
+      inputs.scan-level == 'full'
+
+    name: Comprehensive Security
+
+    runs-on: ubuntu-latest
+
+    needs:
+      - fast-security
+
+    steps:
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      ######################################################
+      # SAST
+      ######################################################
+
+      - name: Semgrep Scan
+
+        uses: returntocorp/semgrep-action@v1
+
+        with:
+          config: >
+            p/security-audit
+            p/owasp-top-ten
+
+      ######################################################
+      # Java Security
+      ######################################################
+
+      - name: Setup Java
+
+        uses: actions/setup-java@v4
+
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: OWASP Dependency Check
+
+        working-directory: services/java-service
+
+        run: mvn dependency-check:check
+
+      - name: SpotBugs
+
+        working-directory: services/java-service
+
+        run: mvn spotbugs:check
+
+      ######################################################
+      # Rust Security
+      ######################################################
+
+      - name: Setup Rust
+
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install Cargo Audit
+
+        run: cargo install cargo-audit --locked
+
+      - name: Cargo Audit
+
+        working-directory: services/rust-processor
+
+        run: cargo audit
+
+      ######################################################
+      # Terraform Security
+      ######################################################
+
+      - name: Checkov Scan
+
+        uses: bridgecrewio/checkov-action@master
+
+        with:
+          directory: terraform
+
+      ######################################################
+      # Helm Validation
+      ######################################################
+
+      - name: Helm Lint
+
+        run: |
+          helm lint helm/shared-platform-chart/microservice
+
+############################################################
+# FULL SECURITY
+############################################################
+
+  full-security:
+
+    if: inputs.scan-level == 'full'
+
+    name: Full Production Security
+
+    runs-on: ubuntu-latest
+
+    needs:
+      - comprehensive-security
+
+    steps:
+
+      - name: Checkout Repository
+
+        uses: actions/checkout@v4
+
+      ######################################################
+      # Trivy Filesystem Scan
+      ######################################################
+
+      - name: Trivy Repository Scan
+
+        uses: aquasecurity/trivy-action@0.28.0
+
+        with:
+
+          scan-type: fs
+
+          scan-ref: .
+
+          severity: HIGH,CRITICAL
+
+      ######################################################
+      # Generate SBOM
+      ######################################################
+
+      - name: Install Syft
+
+        uses: anchore/sbom-action/download-syft@v0
+
+      - name: Generate SBOM
+
+        run: |
+          syft . -o spdx-json > sbom.json
+
+      ######################################################
+      # Upload SBOM
+      ######################################################
+
+      - name: Upload SBOM
+
+        uses: actions/upload-artifact@v4
+
+        with:
+
+          name: sbom
+
+          path: sbom.json
+
+############################################################
+# SUMMARY
+############################################################
+
+  security-summary:
+
+    name: Security Summary
+
+    if: always()
+
+    runs-on: ubuntu-latest
+
+    needs:
+
+      - fast-security
+      - comprehensive-security
+      - full-security
+
+    steps:
+
+      - name: Print Summary
+
+        run: |
+
+          echo "================================="
+          echo "SECURITY SCAN SUMMARY"
+          echo "================================="
+
+          echo "Scan Level: ${{ inputs.scan-level }}"
+          echo "Fast Scan Result: ${{ needs.fast-security.result }}"
+          echo "Comprehensive Result: ${{ needs.comprehensive-security.result }}"
+          echo "Full Result: ${{ needs.full-security.result }}"

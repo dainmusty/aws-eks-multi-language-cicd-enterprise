@@ -1,0 +1,27 @@
+image:
+  repository: my-ecr/rust-processor
+
+service:
+  targetPort: 8081
+
+health:
+  endpoint: /actuator/health
+
+env:
+  APP_ENV: production
+
+config:
+  rustLog: info
+
+resources:
+  requests:
+    cpu: "100m"
+    memory: "128Mi"
+
+  limits:
+    cpu: "300m"
+    memory: "256Mi"
+
+autoscaling:
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 75

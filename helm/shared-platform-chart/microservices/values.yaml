@@ -1,0 +1,258 @@
+############################################################
+# SHARED BASE VALUES
+#
+# PURPOSE:
+# Shared defaults across ALL microservices.
+#
+# Service-specific overrides:
+# - values-js.yaml
+# - values-java.yaml
+# - values-rust.yaml
+############################################################
+
+replicaCount: 2
+
+image:
+  repository: ""
+  tag: latest
+  pullPolicy: IfNotPresent
+
+############################################################
+# IMAGE PULL SECRETS
+############################################################
+
+imagePullSecrets: []
+
+############################################################
+# OVERRIDE NAMES
+############################################################
+
+nameOverride: ""
+fullnameOverride: ""
+
+############################################################
+# SERVICE ACCOUNT
+############################################################
+
+serviceAccount:
+
+  # Create dedicated service account
+  create: true
+
+  # Optional annotations for IAM Roles for Service Accounts
+  annotations: {}
+
+  name: ""
+
+############################################################
+# POD ANNOTATIONS
+############################################################
+
+podAnnotations: {}
+
+############################################################
+# POD LABELS
+############################################################
+
+podLabels:
+  app:  microservice
+
+############################################################
+# POD SECURITY CONTEXT
+############################################################
+
+podSecurityContext:
+  fsGroup: 1000
+
+############################################################
+# CONTAINER SECURITY CONTEXT
+############################################################
+
+securityContext:
+
+  runAsNonRoot: true
+
+  runAsUser: 1000
+
+  allowPrivilegeEscalation: false
+
+  capabilities:
+    drop:
+      - ALL
+
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 3000
+
+health:
+  endpoint: /actuator/health
+
+
+############################################################
+# INGRESS CONFIGURATION
+############################################################
+
+ingress:
+
+  enabled: true
+
+  className: alb
+
+  annotations:
+
+    kubernetes.io/ingress.class: alb
+
+    alb.ingress.kubernetes.io/scheme: internet-facing
+
+    alb.ingress.kubernetes.io/target-type: ip
+
+    alb.ingress.kubernetes.io/healthcheck-path: /actuator/health
+
+  hosts:
+    - host: javascript-api.example.com
+
+      paths:
+        - path: /
+          pathType: Prefix
+
+  tls: []
+
+
+############################################################
+# RESOURCE LIMITS & REQUESTS
+############################################################
+
+
+resources:
+  requests:
+    cpu: "100m"
+    memory: "128Mi"
+
+  limits:
+    cpu: "250m"
+    memory: "256Mi"
+
+
+
+############################################################
+# HEALTH ENDPOINT CONFIGURATION
+#
+# PURPOSE:
+# Used dynamically by:
+# - liveness probes
+# - readiness probes
+# - Helm test connections
+#
+# Java Spring Boot exposes health checks through:
+# /actuator/health
+############################################################
+
+health:
+
+  endpoint: /actuator/health
+
+############################################################
+# HEALTH PROBES
+############################################################
+
+livenessProbe:
+
+  httpGet:
+    path: /actuator/health/liveness
+    port: 8080
+
+  initialDelaySeconds: 30
+  periodSeconds: 10
+
+readinessProbe:
+
+  httpGet:
+    path: /actuator/health/readiness
+    port: 8080
+
+  initialDelaySeconds: 10
+  periodSeconds: 5
+
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 70
+
+
+############################################################
+# NODE SCHEDULING
+############################################################
+
+nodeSelector: {}
+
+############################################################
+# TOLERATIONS
+############################################################
+
+tolerations: []
+
+############################################################
+# AFFINITY RULES
+############################################################
+
+affinity: {}
+
+############################################################
+# POD DISRUPTION BUDGET
+############################################################
+ 
+
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+
+
+############################################################
+# NETWORK POLICY
+############################################################
+
+networkPolicy:
+
+  enabled: true
+
+  ingress:
+    enabled: true
+
+  egress:
+    enabled: true
+
+
+
+env: {}
+
+config: {}
+
+############################################################
+# SECRET VALUES
+#
+# DO NOT COMMIT REAL VALUES.
+#
+# Use:
+# - External Secrets
+# - AWS Secrets Manager
+# - Sealed Secrets
+############################################################
+
+secrets:
+
+  DATABASE_URL: ""
+
+  API_KEY: ""
+
+############################################################
+# TESTS
+############################################################
+
+tests:
+
+  enabled: true
+
