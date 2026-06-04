@@ -43,7 +43,7 @@ spec:
   # ARGOCD PROJECT
   ##########################################################
 
-  project: argocd/projects/platform-project
+  project: default
 
   ##########################################################
   # SOURCE REPOSITORY
@@ -53,9 +53,9 @@ spec:
 
   source:
 
-    repoURL: https://github.com/your-org/polyglot-microservices
+    repoURL: https://github.com/dainmusty/aws-eks-multi-language-cicd-enterprise.git
 
-    targetRevision: main
+    targetRevision: dev
 
     path: gitops
 

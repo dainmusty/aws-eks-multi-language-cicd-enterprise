@@ -7,7 +7,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/dainmusty/aws-eks-multi-language-cicd-enterprise.git
-    targetRevision: develop
+    targetRevision: dev
     path: helm/shared-platform-chart/microservice
     helm:
       valueFiles:
