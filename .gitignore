@@ -51,6 +51,13 @@ live/platform/plan.txt
 # Node
 node_modules/
 
+# Java
+**/target/
+
+# Rust
+**/target/
+
+
 # Logs
 *.log
 
