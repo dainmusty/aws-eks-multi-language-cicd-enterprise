@@ -180,6 +180,8 @@ livenessProbe:
 
   initialDelaySeconds: 45
   periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
 
 readinessProbe:
 
@@ -188,7 +190,9 @@ readinessProbe:
     port: 8080
 
   initialDelaySeconds: 45
-  periodSeconds: 5
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
 
 ############################################################
 # HORIZONTAL POD AUTOSCALER
