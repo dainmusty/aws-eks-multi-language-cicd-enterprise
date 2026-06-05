@@ -19,7 +19,7 @@ replicaCount: 1
 
 image:
   repository: dainmusty/java-service
-  tag: dev-latest1
+  tag: dev-latest
   pullPolicy: IfNotPresent
 
 ############################################################
