@@ -178,10 +178,10 @@ livenessProbe:
     path: /actuator/health
     port: 8080
 
-  initialDelaySeconds: 45
-  periodSeconds: 5
+  initialDelaySeconds: 60
+  periodSeconds: 10
   timeoutSeconds: 5
-  failureThreshold: 30
+  failureThreshold: 3
 
 readinessProbe:
 
@@ -189,7 +189,7 @@ readinessProbe:
     path: /actuator/health
     port: 8080
 
-  initialDelaySeconds: 45
+  initialDelaySeconds: 60
   periodSeconds: 10
   timeoutSeconds: 5
   failureThreshold: 3
