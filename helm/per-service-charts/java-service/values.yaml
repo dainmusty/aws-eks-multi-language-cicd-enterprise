@@ -179,9 +179,9 @@ livenessProbe:
     port: 8080
 
   initialDelaySeconds: 45
-  periodSeconds: 10
+  periodSeconds: 5
   timeoutSeconds: 5
-  failureThreshold: 3
+  failureThreshold: 30
 
 readinessProbe:
 

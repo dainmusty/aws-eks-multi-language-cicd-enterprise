@@ -56,4 +56,10 @@ public class ItemController {
         response.put("message", "Item deleted");
         return response;
     }
+
+    // 👇 Added root mapping so "/" returns a simple message
+    @GetMapping("/")
+    public String root() {
+        return "Java Service Running";
+    }
 }
