@@ -26,10 +26,10 @@ replicaCount: 2
 ############################################################
 
 image:
-  repository: dainmusty/java-api
+  repository: dainmusty/java-service
 
   # Updated dynamically by GitHub Actions deploy pipeline
-  tag: "latest"
+  tag: "dev-latest"
 
   pullPolicy: IfNotPresent
 
