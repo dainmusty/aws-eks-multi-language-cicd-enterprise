@@ -176,7 +176,7 @@ spec:
               path: {{ .Values.health.endpoint }}
               port: {{ .Values.service.targetPort }}
 
-          initialDelaySeconds: 30
+          initialDelaySeconds: 45
           periodSeconds: 10
           timeoutSeconds: 5
           failureThreshold: 3
@@ -192,8 +192,8 @@ spec:
               path: {{ .Values.health.endpoint }}
               port: {{ .Values.service.targetPort }}
 
-          initialDelaySeconds: 15
-          periodSeconds: 5
+          initialDelaySeconds: 45
+          periodSeconds: 10
           timeoutSeconds: 3
           failureThreshold: 3
           ##################################################
