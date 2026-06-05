@@ -20,7 +20,7 @@ replicaCount: 2
 ############################################################
 
 image:
-  repository: dainmusty/java-api
+  repository: dainmusty/java-service
   tag: staging-latest
   pullPolicy: IfNotPresent
 

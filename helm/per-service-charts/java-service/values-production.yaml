@@ -20,7 +20,7 @@ replicaCount: 4
 ############################################################
 
 image:
-  repository: dainmusty/java-api
+  repository: dainmusty/java-service
   tag: stable
   pullPolicy: IfNotPresent
 
