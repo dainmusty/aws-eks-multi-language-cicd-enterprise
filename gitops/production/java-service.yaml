@@ -8,10 +8,10 @@ spec:
   source:
     repoURL: https://github.com/dainmusty/aws-eks-multi-language-cicd-enterprise.git
     targetRevision: main
-    path: helm/shared-platform-chart/microservice
+    path: helm/per-service-charts/microservice
     helm:
       valueFiles:
-        - values-java.yaml
+        - values.yaml
         - values-production.yaml
   destination:
     server: https://kubernetes.default.svc

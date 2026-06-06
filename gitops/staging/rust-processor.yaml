@@ -8,10 +8,10 @@ spec:
   source:
     repoURL: https://github.com/dainmusty/aws-eks-multi-language-cicd-enterprise.git
     targetRevision: staging
-    path: helm/shared-platform-chart/microservice
+    path: helm/per-service-charts/rust-service
     helm:
       valueFiles:
-        - values-rust.yaml
+        - values.yaml
         - values-staging.yaml
   destination:
     server: https://kubernetes.default.svc
