@@ -106,7 +106,7 @@ service:
 
   port: 80
 
-  targetPort: 8081
+  targetPort: 8888
 
 ############################################################
 # INGRESS CONFIGURATION
