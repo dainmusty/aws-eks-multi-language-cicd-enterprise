@@ -29,7 +29,7 @@ image:
   repository: dainmusty/rust-processor
 
   # Updated dynamically by GitHub Actions deploy pipeline
-  tag: "dev-latest"
+  tag: "dev-latest1"
 
   pullPolicy: IfNotPresent
 

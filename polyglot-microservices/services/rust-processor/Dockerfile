@@ -65,7 +65,7 @@ WORKDIR /app
 # COPY BINARY
 ############################################################
 
-COPY --from=builder /app/target/release/rust-processor .
+COPY --from=builder /app/target/release/rust_processor .
 
 ############################################################
 # SECURITY

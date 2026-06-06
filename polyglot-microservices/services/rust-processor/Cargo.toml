@@ -1,5 +1,5 @@
 [package]
-name = "rust-processor"
+name = "rust_processor"
 version = "1.0.0"
 edition = "2021"
 
@@ -16,5 +16,5 @@ env_logger = "0.11.3"
 tokio-test = "0.4.4"
 
 [[bin]]
-name = "rust-processor"
+name = "rust_processor"
 path = "src/main.rs"

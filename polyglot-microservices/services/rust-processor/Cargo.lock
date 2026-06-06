@@ -3,5 +3,5 @@
 version = 3
 
 [[package]]
-name = "rust-processor"
+name = "rust_processor"
 version = "1.0.0"
