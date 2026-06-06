@@ -31,7 +31,7 @@ image:
 service:
   type: ClusterIP
   port: 80
-  targetPort: 8888
+  targetPort: 8081
 
 ############################################################
 # INGRESS (PRODUCTION GRADE)

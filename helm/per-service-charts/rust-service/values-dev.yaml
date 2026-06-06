@@ -19,7 +19,7 @@ replicaCount: 1
 
 image:
   repository: dainmusty/rust-processor
-  tag: dev-latest1
+  tag: dev-latest2
   pullPolicy: IfNotPresent
 
 ############################################################
@@ -29,7 +29,7 @@ image:
 service:
   type: ClusterIP
   port: 80
-  targetPort: 8888
+  targetPort: 8081
 
 ############################################################
 # APPLICATION CONFIGURATION (CONFIGMAP)

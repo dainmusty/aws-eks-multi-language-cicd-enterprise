@@ -77,7 +77,7 @@ USER appuser
 # PORT
 ############################################################
 
-EXPOSE 8888
+EXPOSE 8081
 
 ############################################################
 # HEALTH CHECK
@@ -87,7 +87,7 @@ HEALTHCHECK --interval=30s \
             --timeout=5s \
             --start-period=10s \
             --retries=3 \
-  CMD curl -f http://localhost:8888/health || exit 1
+  CMD curl -f http://localhost:8081/health || exit 1
 
 ############################################################
 # START APP
