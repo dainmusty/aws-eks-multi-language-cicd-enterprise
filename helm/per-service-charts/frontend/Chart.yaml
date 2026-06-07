@@ -24,7 +24,7 @@ apiVersion: v2
 # CHART NAME
 ############################################################
 
-name: react-frontend
+name: react-dashboard-dev
 
 ############################################################
 # CHART DESCRIPTION

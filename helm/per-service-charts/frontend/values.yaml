@@ -71,7 +71,7 @@ podAnnotations: {}
 ############################################################
 
 podLabels:
-  app: react-dashboard
+  app: react-dashboard-dev
 
 ############################################################
 # POD SECURITY CONTEXT
