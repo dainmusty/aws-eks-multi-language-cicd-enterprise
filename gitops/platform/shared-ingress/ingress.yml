@@ -66,3 +66,24 @@ spec:
 
               port:
                 number: 80
+
+ ##########################################################
+  # REACT-DASHBOARD
+  ##########################################################
+
+  - host: react-dashboard.local
+
+    http:
+      paths:
+
+
+        - path: /
+          pathType: Prefix
+
+          backend:
+          service:
+            name: react-dashboard-dev
+            port:
+              number: 80        
+
+              
