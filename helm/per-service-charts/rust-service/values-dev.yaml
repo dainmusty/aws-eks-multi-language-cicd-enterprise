@@ -19,7 +19,7 @@ replicaCount: 1
 
 image:
   repository: dainmusty/rust-processor
-  tag: dev-latest2
+  tag: dev-latest3
   pullPolicy: IfNotPresent
 
 ############################################################
