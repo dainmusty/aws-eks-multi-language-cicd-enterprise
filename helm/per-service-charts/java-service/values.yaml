@@ -29,7 +29,7 @@ image:
   repository: dainmusty/java-service
 
   # Updated dynamically by GitHub Actions deploy pipeline
-  tag: "dev-latest1"
+  tag: "dev-latest2"
 
   pullPolicy: IfNotPresent
 
