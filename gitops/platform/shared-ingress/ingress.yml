@@ -14,7 +14,7 @@ spec:
   # JAVASCRIPT API
   ##########################################################
 
-  - host: javascript-api.local
+  - host: dashboard.local/api/js
     http:
       paths:
         - path: /api/js
@@ -29,7 +29,7 @@ spec:
   # JAVA SERVICE
   ##########################################################
 
-  - host: java-service.local
+  - host: dashboard.local/api/java
     http:
       paths:
         - path: /api/java
@@ -44,7 +44,7 @@ spec:
   # RUST PROCESSOR
   ##########################################################
 
-  - host: rust-processor.local
+  - host: dashboard.local/api/rust
     http:
       paths:
         - path: /api/rust
