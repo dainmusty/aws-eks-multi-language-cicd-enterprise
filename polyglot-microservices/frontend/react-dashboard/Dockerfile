@@ -4,7 +4,7 @@ FROM nginx:alpine
 # Copy your custom nginx.conf (with pid + temp paths redirected to /tmp)
 COPY nginx.conf /etc/nginx/nginx.conf
 
-# Copy your application static files (adjust path as needed)
+# Copy your application static files (React build output)
 COPY ./dist /usr/share/nginx/html
 
 # Ensure /tmp directories exist and are owned by nginx user
