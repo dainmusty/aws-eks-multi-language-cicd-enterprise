@@ -9,61 +9,39 @@ spec:
   ingressClassName: nginx
 
   rules:
-
-  ##########################################################
-  # SINGLE HOST
-  ##########################################################
-
   - host: dashboard.local
 
-    http:
+  http:
+    paths:
 
-      paths:
+    - path: /api/js(/|$)(.*)
+      pathType: ImplementationSpecific
+      backend:
+        service:
+          name: javascript-api-dev
+          port:
+            number: 80
 
-      ######################################################
-      # REACT DASHBOARD
-      ######################################################
+    - path: /api/java(/|$)(.*)
+      pathType: ImplementationSpecific
+      backend:
+        service:
+          name: java-service-dev
+          port:
+            number: 80
 
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: react-dashboard-dev
-            port:
-              number: 80
+    - path: /api/rust(/|$)(.*)
+      pathType: ImplementationSpecific
+      backend:
+        service:
+          name: rust-processor-dev
+          port:
+            number: 80
 
-      ######################################################
-      # JAVASCRIPT API
-      ######################################################
-
-      - path: /api/js
-        pathType: Prefix
-        backend:
-          service:
-            name: javascript-api-dev
-            port:
-              number: 80
-
-      ######################################################
-      # JAVA SERVICE
-      ######################################################
-
-      - path: /api/java
-        pathType: Prefix
-        backend:
-          service:
-            name: java-service-dev
-            port:
-              number: 80
-
-      ######################################################
-      # RUST PROCESSOR
-      ######################################################
-
-      - path: /api/rust
-        pathType: Prefix
-        backend:
-          service:
-            name: rust-processor-dev
-            port:
-              number: 80
+    - path: /
+      pathType: Prefix
+      backend:
+        service:
+          name: react-dashboard-dev
+          port:
+            number: 80
