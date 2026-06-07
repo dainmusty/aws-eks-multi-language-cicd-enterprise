@@ -6,17 +6,17 @@ function App() {
   const [rustApi, setRustApi] = useState(null);
 
   useEffect(() => {
-    fetch("/api/js/health")
+    fetch('/api/js/health')
       .then((res) => res.json())
       .then(setJsApi)
       .catch(console.error);
 
-    fetch("/api/java/actuator/health")
+    fetch('/api/java/actuator/health')
       .then((res) => res.json())
       .then(setJavaApi)
       .catch(console.error);
 
-    fetch("/api/rust/health")
+    fetch('/api/rust/health')
       .then((res) => res.json())
       .then(setRustApi)
       .catch(console.error);

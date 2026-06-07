@@ -29,7 +29,7 @@ image:
   repository: dainmusty/react-dashboard
 
   # Updated dynamically by GitHub Actions deploy pipeline
-  tag: "dev-latest7"
+  tag: "dev-latest8"
 
   pullPolicy: IfNotPresent
 
