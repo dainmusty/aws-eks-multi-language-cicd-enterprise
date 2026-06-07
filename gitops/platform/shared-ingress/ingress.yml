@@ -10,38 +10,36 @@ spec:
 
   rules:
   - host: dashboard.local
+    http:
+      paths:
+        - path: /api/js(/|$)(.*)
+          pathType: ImplementationSpecific
+          backend:
+            service:
+              name: javascript-api-dev
+              port:
+                number: 80
 
-  http:
-    paths:
+        - path: /api/java(/|$)(.*)
+          pathType: ImplementationSpecific
+          backend:
+            service:
+              name: java-service-dev
+              port:
+                number: 80
 
-    - path: /api/js(/|$)(.*)
-      pathType: ImplementationSpecific
-      backend:
-        service:
-          name: javascript-api-dev
-          port:
-            number: 80
+        - path: /api/rust(/|$)(.*)
+          pathType: ImplementationSpecific
+          backend:
+            service:
+              name: rust-processor-dev
+              port:
+                number: 80
 
-    - path: /api/java(/|$)(.*)
-      pathType: ImplementationSpecific
-      backend:
-        service:
-          name: java-service-dev
-          port:
-            number: 80
-
-    - path: /api/rust(/|$)(.*)
-      pathType: ImplementationSpecific
-      backend:
-        service:
-          name: rust-processor-dev
-          port:
-            number: 80
-
-    - path: /
-      pathType: Prefix
-      backend:
-        service:
-          name: react-dashboard-dev
-          port:
-            number: 80
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: react-dashboard-dev
+              port:
+                number: 80
