@@ -24,14 +24,14 @@ apiVersion: v2
 # CHART NAME
 ############################################################
 
-name: javascript-api
+name: react-frontend
 
 ############################################################
 # CHART DESCRIPTION
 ############################################################
 
 description: >
-  Enterprise Helm chart for the JavaScript API microservice.
+  Enterprise Helm chart for the React frontend microservice.
 
 ############################################################
 # CHART TYPE
