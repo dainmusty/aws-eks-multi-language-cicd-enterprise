@@ -19,7 +19,7 @@ replicaCount: 1
 
 image:
   repository: dainmusty/react-dashboard
-  tag: dev-latest6
+  tag: dev-latest7
   pullPolicy: IfNotPresent
 
 ############################################################

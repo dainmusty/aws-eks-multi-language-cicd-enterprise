@@ -17,7 +17,7 @@ spec:
   - host: javascript-api.local
     http:
       paths:
-        - path: /
+        - path: /api/js
           pathType: Prefix
           backend:
             service:
@@ -32,7 +32,7 @@ spec:
   - host: java-service.local
     http:
       paths:
-        - path: /
+        - path: /api/java
           pathType: Prefix
           backend:
             service:
@@ -47,7 +47,7 @@ spec:
   - host: rust-processor.local
     http:
       paths:
-        - path: /
+        - path: /api/rust
           pathType: Prefix
           backend:
             service:
@@ -62,7 +62,7 @@ spec:
   - host: react-dashboard.local
     http:
       paths:
-        - path: /
+        - path: /api/dashboard
           pathType: Prefix
           backend:
             service:
