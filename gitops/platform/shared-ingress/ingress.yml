@@ -6,66 +6,64 @@ metadata:
   namespace: polyglot-dev
 
 spec:
-  ingressClassName: nginx  # Future AWS ALB Ingress Controller: alb
+  ingressClassName: nginx
 
   rules:
 
   ##########################################################
-  # JAVASCRIPT API
+  # SINGLE HOST
   ##########################################################
 
-  - host: dashboard.local/api/js
+  - host: dashboard.local
+
     http:
+
       paths:
-        - path: /api/js
-          pathType: Prefix
-          backend:
-            service:
-              name: javascript-api-dev
-              port:
-                number: 80
 
-  ##########################################################
-  # JAVA SERVICE
-  ##########################################################
+      ######################################################
+      # REACT DASHBOARD
+      ######################################################
 
-  - host: dashboard.local/api/java
-    http:
-      paths:
-        - path: /api/java
-          pathType: Prefix
-          backend:
-            service:
-              name: java-service-dev
-              port:
-                number: 80
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: react-dashboard-dev
+            port:
+              number: 80
 
-  ##########################################################
-  # RUST PROCESSOR
-  ##########################################################
+      ######################################################
+      # JAVASCRIPT API
+      ######################################################
 
-  - host: dashboard.local/api/rust
-    http:
-      paths:
-        - path: /api/rust
-          pathType: Prefix
-          backend:
-            service:
-              name: rust-processor-dev
-              port:
-                number: 80
+      - path: /api/js
+        pathType: Prefix
+        backend:
+          service:
+            name: javascript-api-dev
+            port:
+              number: 80
 
-  ##########################################################
-  # REACT-DASHBOARD
-  ##########################################################
+      ######################################################
+      # JAVA SERVICE
+      ######################################################
 
-  - host: react-dashboard.local
-    http:
-      paths:
-        - path: /api/dashboard
-          pathType: Prefix
-          backend:
-            service:
-              name: react-dashboard-dev
-              port:
-                number: 80
+      - path: /api/java
+        pathType: Prefix
+        backend:
+          service:
+            name: java-service-dev
+            port:
+              number: 80
+
+      ######################################################
+      # RUST PROCESSOR
+      ######################################################
+
+      - path: /api/rust
+        pathType: Prefix
+        backend:
+          service:
+            name: rust-processor-dev
+            port:
+              number: 80
