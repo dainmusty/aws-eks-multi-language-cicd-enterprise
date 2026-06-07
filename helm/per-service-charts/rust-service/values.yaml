@@ -114,7 +114,7 @@ service:
 
 ingress:
 
-  enabled: true
+  enabled: false
 
   className: alb
 

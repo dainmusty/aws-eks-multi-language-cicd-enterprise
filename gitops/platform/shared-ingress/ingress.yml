@@ -1,0 +1,68 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+
+metadata:
+  name: polyglot-ingress
+  namespace: polyglot-dev
+
+spec:
+  ingressClassName: nginx  # Future AWS ALB Ingress Controller: alb
+
+  rules:
+
+  ##########################################################
+  # JAVASCRIPT API
+  ##########################################################
+
+  - host: javascript-api.local
+
+    http:
+      paths:
+
+        - path: /
+          pathType: Prefix
+
+          backend:
+            service:
+              name: javascript-api-dev
+
+              port:
+                number: 80
+
+  ##########################################################
+  # JAVA SERVICE
+  ##########################################################
+
+  - host: java-service.local
+
+    http:
+      paths:
+
+        - path: /
+          pathType: Prefix
+
+          backend:
+            service:
+              name: java-service-dev
+
+              port:
+                number: 80
+
+  ##########################################################
+  # RUST PROCESSOR
+  ##########################################################
+
+  - host: rust-processor.local
+
+    http:
+      paths:
+
+        - path: /
+          pathType: Prefix
+
+          backend:
+            service:
+              name: rust-processor-dev
+
+              port:
+                number: 80

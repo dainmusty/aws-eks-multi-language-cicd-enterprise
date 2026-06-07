@@ -1,91 +1,91 @@
-############################################################
-# KUBERNETES INGRESS
-#
-# PURPOSE:
-# Exposes the JavaScript API externally
-# through the AWS Load Balancer Controller.
-#
-# ENTERPRISE FEATURES:
-# - ALB integration
-# - HTTPS ready
-# - Host-based routing
-# - Health checks
-# - Internet/internal support
-############################################################
+# ############################################################
+# # KUBERNETES INGRESS
+# #
+# # PURPOSE:
+# # Exposes the JavaScript API externally
+# # through the AWS Load Balancer Controller.
+# #
+# # ENTERPRISE FEATURES:
+# # - ALB integration
+# # - HTTPS ready
+# # - Host-based routing
+# # - Health checks
+# # - Internet/internal support
+# ############################################################
 
-{{- if .Values.ingress.enabled }}
+# {{- if .Values.ingress.enabled }}
 
-apiVersion: networking.k8s.io/v1
+# apiVersion: networking.k8s.io/v1
 
-kind: Ingress
+# kind: Ingress
 
-metadata:
+# metadata:
 
-  name: {{ include "java-service.fullname" . }}
+#   name: {{ include "java-service.fullname" . }}
 
-  labels:
-    {{- include "java-service.labels" . | nindent 4 }}
+#   labels:
+#     {{- include "java-service.labels" . | nindent 4 }}
 
-  ##########################################################
-  # ALB ANNOTATIONS
-  ##########################################################
+#   ##########################################################
+#   # ALB ANNOTATIONS
+#   ##########################################################
 
-  annotations:
+#   annotations:
 
-    {{- with .Values.ingress.annotations }}
-    {{- toYaml . | nindent 4 }}
-    {{- end }}
+#     {{- with .Values.ingress.annotations }}
+#     {{- toYaml . | nindent 4 }}
+#     {{- end }}
 
-spec:
+# spec:
 
-  ##########################################################
-  # INGRESS CLASS
-  ##########################################################
+#   ##########################################################
+#   # INGRESS CLASS
+#   ##########################################################
 
-  ingressClassName: {{ .Values.ingress.className }}
+#   ingressClassName: {{ .Values.ingress.className }}
 
-  ##########################################################
-  # TLS CONFIGURATION
-  ##########################################################
+#   ##########################################################
+#   # TLS CONFIGURATION
+#   ##########################################################
 
-  {{- if .Values.ingress.tls }}
+#   {{- if .Values.ingress.tls }}
 
-  tls:
-    {{- toYaml .Values.ingress.tls | nindent 4 }}
+#   tls:
+#     {{- toYaml .Values.ingress.tls | nindent 4 }}
 
-  {{- end }}
+#   {{- end }}
 
-  ##########################################################
-  # HOST RULES
-  ##########################################################
+#   ##########################################################
+#   # HOST RULES
+#   ##########################################################
 
-  rules:
+#   rules:
 
-    {{- range .Values.ingress.hosts }}
+#     {{- range .Values.ingress.hosts }}
 
-    - host: {{ .host | quote }}
+#     - host: {{ .host | quote }}
 
-      http:
+#       http:
 
-        paths:
+#         paths:
 
-          {{- range .paths }}
+#           {{- range .paths }}
 
-          - path: {{ .path }}
+#           - path: {{ .path }}
 
-            pathType: {{ .pathType }}
+#             pathType: {{ .pathType }}
 
-            backend:
+#             backend:
 
-              service:
+#               service:
 
-                name: {{ include "java-service.fullname" $ }}
+#                 name: {{ include "java-service.fullname" $ }}
 
-                port:
-                  number: {{ $.Values.service.port }}
+#                 port:
+#                   number: {{ $.Values.service.port }}
 
-          {{- end }}
+#           {{- end }}
 
-    {{- end }}
+#     {{- end }}
 
-{{- end }}
+# {{- end }}
