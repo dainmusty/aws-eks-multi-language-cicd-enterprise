@@ -13,7 +13,11 @@ function ServiceCard({ title, technology, data }) {
         padding: "20px",
         borderRadius: "12px",
         boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+        flex: "1 1 300px",       // equal growth/shrink
         minWidth: "280px",
+        maxWidth: "320px",       // uniform width
+        display: "flex",
+        flexDirection: "column", // stack content vertically
       }}
     >
       <h3>{title}</h3>
@@ -40,6 +44,7 @@ function ServiceCard({ title, technology, data }) {
           padding: "10px",
           borderRadius: "8px",
           overflow: "auto",
+          flexGrow: 1,           // stretch to fill space
         }}
       >
         {JSON.stringify(data, null, 2)}
@@ -138,6 +143,7 @@ function App() {
             display: "flex",
             gap: "20px",
             flexWrap: "wrap",
+            alignItems: "stretch", // make all cards equal height
           }}
         >
           <ServiceCard
