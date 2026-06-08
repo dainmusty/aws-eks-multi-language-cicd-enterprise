@@ -1,19 +1,21 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
-
 metadata:
-  name: polyglot-ingress
+  name: polyglot-api-ingress
   namespace: polyglot-dev
+
   annotations:
-    # Apply regex + rewrite only to API paths
     nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
 
 spec:
   ingressClassName: nginx
+
   rules:
   - host: dashboard.local
     http:
       paths:
+
       - path: /api/js(/|$)(.*)
         pathType: ImplementationSpecific
         backend:
@@ -21,8 +23,6 @@ spec:
             name: javascript-api-dev
             port:
               number: 80
-        pathRewrite:
-          nginx.ingress.kubernetes.io/rewrite-target: /$2
 
       - path: /api/java(/|$)(.*)
         pathType: ImplementationSpecific
@@ -31,23 +31,11 @@ spec:
             name: java-service-dev
             port:
               number: 80
-        pathRewrite:
-          nginx.ingress.kubernetes.io/rewrite-target: /$2
 
       - path: /api/rust(/|$)(.*)
         pathType: ImplementationSpecific
         backend:
           service:
             name: rust-processor-dev
-            port:
-              number: 80
-        pathRewrite:
-          nginx.ingress.kubernetes.io/rewrite-target: /$2
-
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: react-dashboard-dev
             port:
               number: 80
