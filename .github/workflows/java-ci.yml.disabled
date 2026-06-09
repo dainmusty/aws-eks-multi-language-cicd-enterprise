@@ -1,10 +1,10 @@
 ############################################################
-# RUST MICROSERVICE CI
+# JAVA MICROSERVICE CI
 #
 # PURPOSE:
-# - Build Rust application
+# - Build Spring Boot application
 # - Run tests
-# - Run linting
+# - Package JAR
 # - Build Docker image
 # - Push image to ECR
 #
@@ -13,13 +13,13 @@
 # .github/workflows/security-scanning.yml
 #
 # ENTERPRISE DESIGN:
-# - Cargo caching
-# - Branch-aware security
 # - OIDC authentication
+# - Maven dependency caching
 # - Immutable image tags
+# - Branch-aware security
 ############################################################
 
-name: Rust CI
+name: Java CI
 
 ############################################################
 # TRIGGERS
@@ -30,12 +30,12 @@ on:
   push:
 
     branches:
-      - develop
+      - dev
       - staging
       - main
 
     paths:
-      - "services/rust-processor/**"
+      - "polyglot-microservices/backend/java-service/**"
 
   pull_request:
 
@@ -43,7 +43,7 @@ on:
       - main
 
     paths:
-      - "services/rust-processor/**"
+      - "polyglot-microservices/backend/java-service/**"
 
 ############################################################
 # GLOBAL VARIABLES
@@ -53,9 +53,9 @@ env:
 
   AWS_REGION: us-east-1
 
-  ECR_REPOSITORY: polyglot/rust-processor
+  ECR_REPOSITORY: polyglot-microservices/backend/java-service
 
-  SERVICE_PATH: services/rust-processor
+  SERVICE_PATH: polyglot-microservices/backend/java-service
 
 ############################################################
 # JOBS
@@ -136,70 +136,44 @@ jobs:
         uses: actions/checkout@v4
 
 ############################################################
-# RUST TOOLCHAIN
+# JAVA SETUP
 ############################################################
 
-      - name: Setup Rust
+      - name: Setup Java
 
-        uses: dtolnay/rust-toolchain@stable
-
-############################################################
-# CACHE CARGO
-############################################################
-
-      - name: Cache Cargo Dependencies
-
-        uses: actions/cache@v4
+        uses: actions/setup-java@v4
 
         with:
 
-          path: |
-            ~/.cargo/bin
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
+          distribution: temurin
 
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          java-version: "17"
+
+          cache: maven
 
 ############################################################
-# FORMAT CHECK
+# BUILD APPLICATION
 ############################################################
 
-      - name: Rust Format Check
+      - name: Build Application
 
         working-directory: ${{ env.SERVICE_PATH }}
 
-        run: cargo fmt --check
+        run: |
+
+          mvn clean verify
 
 ############################################################
-# CLIPPY LINTING
+# PACKAGE JAR
 ############################################################
 
-      - name: Run Clippy
+      - name: Package Spring Boot JAR
 
         working-directory: ${{ env.SERVICE_PATH }}
 
-        run: cargo clippy -- -D warnings
+        run: |
 
-############################################################
-# UNIT TESTS
-############################################################
-
-      - name: Run Unit Tests
-
-        working-directory: ${{ env.SERVICE_PATH }}
-
-        run: cargo test
-
-############################################################
-# RELEASE BUILD
-############################################################
-
-      - name: Build Release Binary
-
-        working-directory: ${{ env.SERVICE_PATH }}
-
-        run: cargo build --release
+          mvn package -DskipTests
 
 ############################################################
 # AWS AUTHENTICATION
@@ -266,9 +240,12 @@ jobs:
 
         with:
 
-          name: rust-build-artifacts
+          name: java-build-artifacts
 
           path: |
-            services/rust-processor/target/release/
+            polyglot-microservices/backend/java-service/target/*.jar
 
           retention-days: 7
+
+
+          

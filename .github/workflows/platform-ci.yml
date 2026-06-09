@@ -30,7 +30,7 @@ on:
 
   pull_request:
     branches:
-      - develop
+      - dev
       - main
 
     paths:
@@ -45,7 +45,7 @@ on:
 
   push:
     branches:
-      - develop
+      - dev
       - main
 
     paths:
@@ -79,6 +79,9 @@ concurrency:
 env:
   TF_VERSION: "1.12.2"
   HELM_VERSION: "3.17.3"
+  HELM_CHART_PATH_JS: helm/per-service-charts/javascript-api-service
+  HELM_CHART_PATH_JAVA: helm/per-service-charts/java-service
+  HELM_CHART_PATH_RUST: helm/per-service-charts/rust-service
 
 ############################################################
 # JOBS
@@ -199,13 +202,13 @@ jobs:
       ######################################################
 
       - name: Helm Lint (JavaScript API)
-        run: helm lint helm/javascript-api
+        run: helm lint ${{ env.HELM_CHART_PATH_JS }}
 
       - name: Helm Lint (Java Service)
-        run: helm lint helm/java-service
+        run: helm lint ${{ env.HELM_CHART_PATH_JAVA }}
 
       - name: Helm Lint (Rust Processor)
-        run: helm lint helm/rust-processor
+        run: helm lint ${{ env.HELM_CHART_PATH_RUST }}
 
       ######################################################
       # Install kubeconform (Kubernetes schema validation)
@@ -227,11 +230,11 @@ jobs:
 
         run: |
 
-          helm template javascript-api helm/javascript-api | kubeconform -strict -summary
+          helm template javascript-api ${{ env.HELM_CHART_PATH_JS }} | kubeconform -strict -summary
 
-          helm template java-service helm/java-service | kubeconform -strict -summary
+          helm template java-service ${{ env.HELM_CHART_PATH_JAVA }} | kubeconform -strict -summary
 
-          helm template rust-processor helm/rust-processor | kubeconform -strict -summary
+          helm template rust-processor ${{ env.HELM_CHART_PATH_RUST }} | kubeconform -strict -summary
 
   ##########################################################
   # 4. GLOBAL SECURITY SCANNING

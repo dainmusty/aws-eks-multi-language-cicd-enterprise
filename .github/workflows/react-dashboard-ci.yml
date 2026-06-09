@@ -1,5 +1,5 @@
 ############################################################
-# JAVASCRIPT MICROSERVICE CI PIPELINE
+# React Dashboard MICROSERVICE CI PIPELINE
 #
 # PURPOSE:
 # Enterprise CI pipeline for:
@@ -11,13 +11,13 @@
 # - ECR Push
 #
 # SERVICE:
-# services/javascript-api
+# services/react-dashboard
 #
 # TRIGGER:
-# Runs only when JavaScript service changes.
+# Runs only when React Dashboard service changes.
 ############################################################
 
-name: JavaScript CI
+name: React Dashboard CI
 
 ############################################################
 # TRIGGERS
@@ -28,11 +28,12 @@ on:
   push:
 
     branches:
+      - dev
+      - staging
       - main
-      - develop
 
     paths:
-      - "services/javascript-api/**"
+      - "polyglot-microservices/frontend/react-dashboard/**"
 
   pull_request:
 
@@ -40,7 +41,7 @@ on:
       - main
 
     paths:
-      - "services/javascript-api/**"
+      - "polyglot-microservices/frontend/react-dashboard/**"
 
 ############################################################
 # ENVIRONMENT VARIABLES
@@ -50,15 +51,64 @@ env:
 
   AWS_REGION: us-east-1
 
-  ECR_REPOSITORY: polyglot/javascript-api
+  ECR_REPOSITORY: polyglot/react-dashboard
 
-  SERVICE_PATH: services/javascript-api
+  SERVICE_PATH: polyglot-microservices/frontend/react-dashboard
 
 ############################################################
 # JOBS
 ############################################################
 
 jobs:
+############################################################
+# DETERMINE SECURITY LEVEL
+############################################################
+
+  determine-scan-level:
+
+    runs-on: ubuntu-latest
+
+    outputs:
+
+      scan-level: ${{ steps.level.outputs.scan-level }}
+
+    steps:
+
+      - name: Determine Scan Level
+
+        id: level
+
+        run: |
+
+          if [[ "${GITHUB_REF}" == "refs/heads/main" ]]; then
+            echo "scan-level=full" >> $GITHUB_OUTPUT
+
+          elif [[ "${GITHUB_REF}" == "refs/heads/staging" ]]; then
+            echo "scan-level=comprehensive" >> $GITHUB_OUTPUT
+
+          else
+            echo "scan-level=fast" >> $GITHUB_OUTPUT
+          fi
+
+############################################################
+# SECURITY WORKFLOW
+############################################################
+
+  security:
+
+    needs: determine-scan-level
+
+    uses: ./.github/workflows/security-scanning.yml
+
+    with:
+
+      scan-level: ${{ needs.determine-scan-level.outputs.scan-level }}
+
+    secrets: inherit
+
+############################################################
+# BUILD / TEST / PACKAGE / PUSH
+############################################################
 
   build-test-scan-push:
 
@@ -79,7 +129,7 @@ jobs:
       uses: actions/checkout@v4
 
     ########################################################
-    # SETUP NODE.JS
+    # JAVASCRIPT - TOOLCHAIN - SETUP NODE.JS
     ########################################################
 
     - name: Setup Node.js
@@ -91,7 +141,7 @@ jobs:
         cache: npm
 
         cache-dependency-path: |
-          services/javascript-api/package-lock.json
+          polyglot-microservices/frontend/react-dashboard/package-lock.json
 
     ########################################################
     # INSTALL DEPENDENCIES
@@ -104,7 +154,7 @@ jobs:
       run: npm ci
 
     ########################################################
-    # ESLINT
+    # JAVASCRIPT - ESLINT
     #
     # Fails pipeline if linting issues exist.
     ########################################################
@@ -116,7 +166,7 @@ jobs:
       run: npm run lint
 
     ########################################################
-    # UNIT TESTS
+    # JAVASCRIPT - UNIT TESTS
     ########################################################
 
     - name: Run Unit Tests
@@ -127,17 +177,17 @@ jobs:
 
     
     ########################################################
-    # BUILD STEP
+    # JAVASCRIPT - BUILD STEP
     #
     # Not required.
     # Service runs directly via Node.js.
     ########################################################
 
     - name: Skip Build Step
-      run: echo "No build stage required for JavaScript service."
+      run: echo "No build stage required for React Dashboard service."
 
     ########################################################
-    # AWS AUTHENTICATION
+    # JAVASCRIPT - AWS AUTHENTICATION
     #
     # Uses GitHub OIDC.
     ########################################################
@@ -149,7 +199,7 @@ jobs:
         aws-region: ${{ env.AWS_REGION }}
 
     ########################################################
-    # LOGIN TO ECR
+    # JAVASCRIPT - LOGIN TO ECR
     ########################################################
 
     - name: Login to Amazon ECR
@@ -157,7 +207,7 @@ jobs:
       uses: aws-actions/amazon-ecr-login@v2
 
     ########################################################
-    # BUILD IMAGE
+    # JAVASCRIPT - BUILD IMAGE
     ########################################################
 
     - name: Build Docker Image
@@ -169,7 +219,7 @@ jobs:
           .
 
     ########################################################
-    # TRIVY IMAGE SCAN
+    # JAVASCRIPT - TRIVY IMAGE SCAN
     #
     # Fails on HIGH/CRITICAL vulnerabilities.
     ########################################################
@@ -184,7 +234,7 @@ jobs:
         ignore-unfixed: true
 
     ########################################################
-    # PUSH IMAGE TO ECR
+    # JAVASCRIPT - PUSH IMAGE TO ECR
     ########################################################
 
     - name: Push Docker Image
@@ -195,14 +245,14 @@ jobs:
           ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest
 
     ########################################################
-    # SAVE TEST REPORTS (OPTIONAL)
+    # JAVASCRIPT - SAVE TEST REPORTS (OPTIONAL)
     ########################################################
 
     - name: Upload Artifacts
       if: always()
       uses: actions/upload-artifact@v4
       with:
-        name: javascript-ci-artifacts
+        name: react-dashboard-ci-artifacts
         path: |
-          services/javascript-api/package.json
+          polyglot-microservices/frontend/react-dashboard/package.json
         retention-days: 7
