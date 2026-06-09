@@ -50,7 +50,7 @@ on:
 
 env:
 
-  TERRAFORM_PATH: terraform
+  TERRAFORM_PATH: terraform/*
 
 ############################################################
 # FAST SECURITY
@@ -101,7 +101,7 @@ jobs:
 
       - name: NPM Audit Critical
 
-        working-directory: services/javascript-api
+        working-directory: polyglot-microservices/*
 
         run: |
           npm ci
