@@ -51,7 +51,10 @@ on:
 env:
 
   TERRAFORM_PATH: terraform/*
-  SERVICE_PATH: polyglot-microservices/backend/javascript-api
+  JS_SERVICE_PATH: polyglot-microservices/backend/javascript-api
+  JAVA_SERVICE_PATH: polyglot-microservices/backend/java-service
+  RUST_SERVICE_PATH: polyglot-microservices/backend/rust-processor
+  REACT_SERVICE_PATH: polyglot-microservices/frontend/react-dashboard
   HELM_PATH: helm/per-service-charts/*
 
 ############################################################
@@ -105,7 +108,7 @@ jobs:
 
       - name: NPM Audit Critical
 
-        working-directory: ${{ env.SERVICE_PATH }}
+        working-directory: ${{ env.JS_SERVICE_PATH }}
 
         run: |
           npm ci
@@ -161,13 +164,13 @@ jobs:
 
       - name: OWASP Dependency Check
 
-        working-directory: ${{ env.SERVICE_PATH }}/java-service
+        working-directory: ${{ env.JAVA_SERVICE_PATH }}
 
         run: mvn dependency-check:check
 
       - name: SpotBugs
 
-        working-directory: ${{ env.SERVICE_PATH }}/java-service
+        working-directory: ${{ env.JAVA_SERVICE_PATH }}
 
         run: mvn spotbugs:check
 
@@ -185,7 +188,7 @@ jobs:
 
       - name: Cargo Audit
 
-        working-directory: ${{ env.SERVICE_PATH }}/rust-processor
+        working-directory: ${{ env.RUST_SERVICE_PATH }}
 
         run: cargo audit
 
