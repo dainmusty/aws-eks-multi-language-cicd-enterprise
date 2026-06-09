@@ -51,7 +51,7 @@ on:
 env:
 
   TERRAFORM_PATH: terraform/*
-  SERVICE_PATH: polyglot-microservices/
+  SERVICE_PATH: polyglot-microservices/backend/javascript-api
   HELM_PATH: helm/per-service-charts/*
 
 ############################################################
