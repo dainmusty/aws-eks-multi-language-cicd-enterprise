@@ -239,14 +239,15 @@ jobs:
 
       - name: Trivy Repository Scan
 
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@0.33.1
 
         with:
 
           scan-type: fs
 
           scan-ref: .
-
+          format: table
+          exit-code: "0"  # Tighten to "1" to fail on vulnerabilities of any severity, or "2" to fail on HIGH/CRITICAL
           severity: HIGH,CRITICAL
 
       ######################################################
