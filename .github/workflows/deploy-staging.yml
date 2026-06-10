@@ -36,19 +36,19 @@ jobs:
         run: |
           sed -i \
           "s/tag:.*/tag: \"staging-${GITHUB_SHA}\"/" \
-          helm/shared-platform-chart/microservice/values-javascript.yaml
+          helm/per-service-charts/backend/javascript-api-service/values.yaml
 
       - name: Update Java STAGING Tag
         run: |
           sed -i \
           "s/tag:.*/tag: \"staging-${GITHUB_SHA}\"/" \
-          helm/shared-platform-chart/microservice/values-java.yaml
+          helm/per-service-charts/backend/java-service/values.yaml
 
       - name: Update Rust STAGING Tag
         run: |
           sed -i \
           "s/tag:.*/tag: \"staging-${GITHUB_SHA}\"/" \
-          helm/shared-platform-chart/microservice/values-rust.yaml
+          helm/per-service-charts/backend/rust-processor/values.yaml
 
       #####################################################
       # Commit GitOps changes
