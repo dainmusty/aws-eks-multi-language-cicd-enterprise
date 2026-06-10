@@ -22,7 +22,7 @@ jobs:
         uses: actions/checkout@v4
 
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.CI_GITHUB_TOKEN }}
 
       #####################################################
       # Update DEV image tags
@@ -32,19 +32,19 @@ jobs:
         run: |
           sed -i \
           "s/tag:.*/tag: \"dev-${GITHUB_SHA}\"/" \
-          helm/shared-platform-chart/microservice/values-javascript.yaml
+          helm/per-service-charts/javascript-api-service/values.yaml
 
       - name: Update Java DEV Tag
         run: |
           sed -i \
           "s/tag:.*/tag: \"dev-${GITHUB_SHA}\"/" \
-          helm/shared-platform-chart/microservice/values-java.yaml
+          helm/per-service-charts/java-service/values.yaml
 
       - name: Update Rust DEV Tag
         run: |
           sed -i \
           "s/tag:.*/tag: \"dev-${GITHUB_SHA}\"/" \
-          helm/shared-platform-chart/microservice/values-rust.yaml
+          helm/per-service-charts/rust-service/values.yaml
 
       #####################################################
       # Commit changes
