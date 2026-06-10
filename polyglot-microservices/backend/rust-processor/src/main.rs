@@ -115,6 +115,5 @@ async fn delete_item(path: web::Path<u32>) -> HttpResponse {
         "id": id,
         "message": "Item deleted"
     });
-
     HttpResponse::Ok().json(response)
 }

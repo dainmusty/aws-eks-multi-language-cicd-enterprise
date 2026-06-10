@@ -2,7 +2,6 @@
 pub fn process_data(input: &str) -> String {
     format!("Processed: {}", input)
 }
-
 #[cfg(test)]
 mod tests {
     use super::*;
