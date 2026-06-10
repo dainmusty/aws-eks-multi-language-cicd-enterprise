@@ -2,8 +2,6 @@ use actix_web::{web, App, HttpResponse, HttpServer};
 use serde::{Deserialize, Serialize};
 use tokio::signal;
 
-mod lib;
-
 #[derive(Serialize, Deserialize)]
 pub struct Item {
     id: u32,
@@ -20,12 +18,10 @@ pub struct HealthResponse {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    // Initialize logger
     env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
 
-    // Read port from environment or default to 8888
     let port = std::env::var("PORT")
-        .unwrap_or_else(|_| "8888".to_string())
+        .unwrap_or_else(|_| "8081".to_string())
         .parse::<u16>()
         .expect("PORT must be a valid number");
 
@@ -67,6 +63,7 @@ async fn health_check() -> HttpResponse {
         service: "rust-processor".to_string(),
         version: "1.0.0".to_string(),
     };
+
     HttpResponse::Ok().json(response)
 }
 
@@ -82,35 +79,42 @@ async fn create_item(item: web::Json<Item>) -> HttpResponse {
         "description": item.description,
         "message": "Item created"
     });
+
     HttpResponse::Created().json(response)
 }
 
 async fn get_item(path: web::Path<u32>) -> HttpResponse {
     let id = path.into_inner();
+
     let item = Item {
         id,
         name: "Item Name".to_string(),
         description: "Item description".to_string(),
     };
+
     HttpResponse::Ok().json(item)
 }
 
 async fn update_item(path: web::Path<u32>, item: web::Json<Item>) -> HttpResponse {
     let id = path.into_inner();
+
     let response = serde_json::json!({
         "id": id,
         "name": item.name,
         "description": item.description,
         "message": "Item updated"
     });
+
     HttpResponse::Ok().json(response)
 }
 
 async fn delete_item(path: web::Path<u32>) -> HttpResponse {
     let id = path.into_inner();
+
     let response = serde_json::json!({
         "id": id,
         "message": "Item deleted"
     });
+
     HttpResponse::Ok().json(response)
 }

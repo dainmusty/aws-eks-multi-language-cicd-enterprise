@@ -1,3 +1,4 @@
+#[allow(dead_code)]
 pub fn process_data(input: &str) -> String {
     format!("Processed: {}", input)
 }
@@ -8,6 +9,7 @@ mod tests {
 
     #[test]
     fn test_process_data() {
-        assert_eq!(process_data("test"), "Processed: test");
+        let result = process_data("sample");
+        assert_eq!(result, "Processed: sample");
     }
 }
