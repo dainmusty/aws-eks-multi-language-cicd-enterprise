@@ -163,7 +163,7 @@ jobs:
       - name: Scan Docker Image
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: ${{ env.DOCKER_REPOSITORY }}:${{ github.sha }}
+          image-ref: ${{ env.DOCKER_REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
           format: table
           severity: HIGH,CRITICAL
           exit-code: "1"
