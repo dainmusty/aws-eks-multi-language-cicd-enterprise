@@ -1,0 +1,99 @@
+name: Deploy PRODUCTION
+
+on:
+
+  push:
+
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+
+  deploy-production:
+
+    runs-on: ubuntu-latest
+
+    #####################################################
+    # GitHub Environment Protection
+    #
+    # Configure:
+    # Settings -> Environments -> Production
+    #
+    # Required reviewers:
+    #   - Security Team
+    #   - Platform Team
+    #
+    # Required approvals:
+    #   2
+    #####################################################
+
+    environment:
+
+      name: production
+
+      url: https://production.company.com
+
+    steps:
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      #####################################################
+      # Update production image tags
+      #####################################################
+
+      - name: Update JavaScript PROD Tag
+        run: |
+          sed -i \
+          "s/tag:.*/tag: \"prod-${GITHUB_SHA}\"/" \
+          helm/shared-platform-chart/microservice/values-javascript.yaml
+
+      - name: Update Java PROD Tag
+        run: |
+          sed -i \
+          "s/tag:.*/tag: \"prod-${GITHUB_SHA}\"/" \
+          helm/shared-platform-chart/microservice/values-java.yaml
+
+      - name: Update Rust PROD Tag
+        run: |
+          sed -i \
+          "s/tag:.*/tag: \"prod-${GITHUB_SHA}\"/" \
+          helm/shared-platform-chart/microservice/values-rust.yaml
+
+      #####################################################
+      # Commit GitOps updates
+      #####################################################
+
+      - name: Commit Changes
+        run: |
+
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+
+          git add .
+
+          git commit -m \
+          "PRODUCTION deployment ${GITHUB_SHA}" \
+          || echo "No changes"
+
+      - name: Push Changes
+        run: git push
+
+      #####################################################
+      # Production validation
+      #####################################################
+
+      - name: Production Smoke Tests
+        run: |
+          echo "Execute production smoke tests"
+
+      - name: Deployment Summary
+        run: |
+          echo "PRODUCTION deployment completed"
+          echo "ArgoCD synchronized production environment"

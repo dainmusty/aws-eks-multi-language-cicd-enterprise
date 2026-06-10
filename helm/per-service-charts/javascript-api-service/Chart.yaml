@@ -1,0 +1,95 @@
+############################################################
+# HELM CHART METADATA
+#
+# PURPOSE:
+# Defines the JavaScript API Helm chart metadata.
+#
+# This chart deploys:
+# - Deployment
+# - Service
+# - Ingress
+# - HPA
+# - PDB
+# - ConfigMaps
+# - Network Policies
+#
+# ENTERPRISE NOTES:
+# - appVersion tracks application image version
+# - version tracks Helm chart version
+############################################################
+
+apiVersion: v2
+
+############################################################
+# CHART NAME
+############################################################
+
+name: javascript-api
+
+############################################################
+# CHART DESCRIPTION
+############################################################
+
+description: >
+  Enterprise Helm chart for the JavaScript API microservice.
+
+############################################################
+# CHART TYPE
+#
+# application = deployable workload
+# library     = reusable helper templates
+############################################################
+
+type: application
+
+############################################################
+# HELM CHART VERSION
+#
+# Increment when:
+# - templates change
+# - values structure changes
+# - Kubernetes manifests change
+############################################################
+
+version: 1.0.0
+
+############################################################
+# APPLICATION VERSION
+#
+# Usually matches Docker image/app release version
+############################################################
+
+appVersion: "1.0.0"
+
+############################################################
+# OPTIONAL METADATA
+############################################################
+
+keywords:
+  - javascript
+  - nodejs
+  - microservice
+  - kubernetes
+  - helm
+
+home: "https://github.com/dainmusty/aws-eks-multi-language-cicd-enterprise.git"
+
+sources:
+  - "https://github.com/dainmusty/aws-eks-multi-language-cicd-enterprise.git"
+
+maintainers:
+  - name: Platform Engineering Team
+    email: platform@company.com
+
+############################################################
+# KUBERNETES VERSION COMPATIBILITY
+############################################################
+
+kubeVersion: ">=1.28.0"
+
+############################################################
+# ANNOTATIONS
+############################################################
+
+annotations:
+  category: "javascript-api"

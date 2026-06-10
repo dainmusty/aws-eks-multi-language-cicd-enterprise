@@ -1,0 +1,96 @@
+name: GitOps Rollback
+
+on:
+
+  workflow_dispatch:
+
+    inputs:
+
+      service:
+
+        description: "Service to Rollback"
+
+        required: true
+
+        type: choice
+
+        options:
+          - javascript-api
+          - java-service
+          - rust-processor
+
+      environment:
+
+        description: "Environment"
+
+        required: true
+
+        type: choice
+
+        options:
+          - dev
+          - staging
+          - production
+
+      image_tag:
+
+        description: "Previous Image Tag"
+
+        required: true
+
+permissions:
+
+  contents: write
+
+jobs:
+
+  rollback:
+
+    runs-on: ubuntu-latest
+
+    environment:
+
+      name: ${{ github.event.inputs.environment }}
+
+    steps:
+
+      - name: Checkout Repository
+
+        uses: actions/checkout@v4
+
+      - name: Update GitOps Manifest
+
+        run: |
+
+          FILE="gitops/${{ github.event.inputs.environment }}/${{ github.event.inputs.service }}.yaml"
+
+          sed -i \
+          "s/tag:.*/tag: ${{ github.event.inputs.image_tag }}/" \
+          $FILE
+
+      - name: Commit Rollback
+
+        run: |
+
+          git config user.name "github-actions"
+
+          git config user.email "github-actions@github.com"
+
+          git add .
+
+          git commit -m \
+          "Rollback ${{ github.event.inputs.service }} in ${{ github.event.inputs.environment }} to ${{ github.event.inputs.image_tag }}" \
+          || echo "No changes"
+
+      - name: Push Rollback
+
+        run: git push
+
+      - name: Rollback Summary
+
+        run: |
+
+          echo "Rollback Complete"
+          echo "Service: ${{ github.event.inputs.service }}"
+          echo "Environment: ${{ github.event.inputs.environment }}"
+          echo "Image Tag: ${{ github.event.inputs.image_tag }}"

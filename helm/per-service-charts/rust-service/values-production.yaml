@@ -1,0 +1,188 @@
+############################################################
+# PRODUCTION ENVIRONMENT VALUES
+#
+# PURPOSE:
+# Fully hardened, highly available environment
+# serving real users and production traffic.
+#
+# PRINCIPLES:
+# - Zero downtime deployments
+# - Strict security enforcement
+# - High availability
+# - Observability first
+# - Controlled scaling
+############################################################
+
+replicaCount: 4
+
+############################################################
+# IMAGE CONFIGURATION
+############################################################
+
+image:
+  repository: dainmusty/rust-processor
+  tag: stable
+  pullPolicy: IfNotPresent
+
+############################################################
+# SERVICE CONFIGURATION
+############################################################
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8081
+
+############################################################
+# INGRESS (PRODUCTION GRADE)
+############################################################
+
+ingress:
+  enabled: false
+
+  className: nginx
+
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /
+
+  hosts:
+    - host: api.mycompany.com
+      paths:
+        - path: /
+          pathType: Prefix
+
+  tls:
+    - secretName: prod-api-tls
+      hosts:
+        - api.mycompany.com
+
+############################################################
+# APPLICATION CONFIGURATION
+############################################################
+
+config:
+
+  nodeEnv: "production"
+
+  logLevel: "warn"
+
+  apiPort: "3000"
+
+  javaServiceUrl: "http://java-service"
+
+  rustProcessorUrl: "http://rust-processor"
+
+  enableMetrics: "true"
+
+  enableTracing: "true"
+
+############################################################
+# SECRETS (PRODUCTION SHOULD COME FROM SECRET MANAGER)
+############################################################
+
+secrets:
+
+  databaseUrl: "postgres://prod-db:5432/app"
+
+  databaseUsername: "prod_user"
+
+  databasePassword: "REDACTED_USE_SECRET_MANAGER"
+
+  jwtSecret: "REDACTED_USE_SECRET_MANAGER"
+
+  apiKey: "REDACTED_USE_SECRET_MANAGER"
+
+############################################################
+# AUTOSCALING (STRICT CONTROL)
+############################################################
+
+autoscaling:
+  enabled: true
+
+  minReplicas: 4
+
+  maxReplicas: 10
+
+  targetCPUUtilizationPercentage: 60
+
+############################################################
+# POD DISRUPTION BUDGET (MANDATORY)
+############################################################
+
+podDisruptionBudget:
+  enabled: true
+
+  minAvailable: 3
+
+############################################################
+# NETWORK POLICY (STRICT ZERO TRUST)
+############################################################
+
+networkPolicy:
+  enabled: true
+
+############################################################
+# RESOURCES (PRODUCTION SIZED)
+############################################################
+
+resources:
+  requests:
+    cpu: "500m"
+    memory: "512Mi"
+
+  limits:
+    cpu: "1"
+    memory: "1Gi"
+
+############################################################
+# SERVICE ACCOUNT (IRSA - STRICT)
+############################################################
+
+serviceAccount:
+  create: true
+
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::123456789012:role/javascript-api-prod-role
+
+############################################################
+# NODE PLACEMENT (HIGH AVAILABILITY)
+############################################################
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity:
+  podAntiAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+            - key: app
+              operator: In
+              values:
+                - javascript-api
+        topologyKey: kubernetes.io/hostname
+
+############################################################
+# OBSERVABILITY (FULL ENABLEMENT)
+############################################################
+
+observability:
+  enabled: true
+
+  prometheusScraping: true
+
+  loggingLevel: structured
+
+############################################################
+# DEPLOYMENT STRATEGY EXPECTATION
+############################################################
+
+deployment:
+  strategy: RollingUpdate
+
+  maxUnavailable: 0
+
+  maxSurge: 1

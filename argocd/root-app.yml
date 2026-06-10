@@ -1,0 +1,92 @@
+############################################################
+# ROOT APP
+#
+# PURPOSE:
+# App-of-Apps pattern
+#
+# This application manages all child applications.
+#
+# CHILD APPLICATIONS:
+#
+# - javascript-api
+# - java-service
+# - rust-processor
+#
+# ENVIRONMENTS:
+#
+# - dev
+# - staging
+# - production
+#
+# BENEFITS:
+#
+# - single deployment entrypoint
+# - centralized GitOps management
+# - automatic application discovery
+# - easier scaling
+#
+############################################################
+
+apiVersion: argoproj.io/v1alpha1
+
+kind: Application
+
+metadata:
+
+  name: root-app
+
+  namespace: argocd
+
+spec:
+
+  ##########################################################
+  # ARGOCD PROJECT
+  ##########################################################
+
+  project: default
+
+  ##########################################################
+  # SOURCE REPOSITORY
+  #
+  # Points to GitOps application manifests
+  ##########################################################
+
+  source:
+
+    repoURL: https://github.com/dainmusty/aws-eks-multi-language-cicd-enterprise.git
+
+    targetRevision: dev
+
+    path: gitops
+
+    directory:
+
+      recurse: true
+
+  ##########################################################
+  # DESTINATION
+  ##########################################################
+
+  destination:
+
+    server: https://kubernetes.default.svc
+
+    namespace: argocd
+
+  ##########################################################
+  # AUTOMATED SYNC
+  ##########################################################
+
+  syncPolicy:
+
+    automated:
+
+      prune: true
+
+      selfHeal: true
+
+    syncOptions:
+
+      - CreateNamespace=true
+
+      - ApplyOutOfSyncOnly=true

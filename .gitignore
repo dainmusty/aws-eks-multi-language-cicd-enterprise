@@ -42,3 +42,38 @@ terraform.rc
 # Optional: ignore plan files saved before destroying Terraform configuration
 # Uncomment the line below if you want to ignore planout files.
 # planout
+
+*.tfplan
+*.txtlive/platform/plan.txt
+live/platform/plan.txt
+*.txt
+
+# Node
+node_modules/
+
+# Java
+**/target/
+
+# Rust
+**/target/
+
+
+# Logs
+*.log
+
+# Environment variables
+.env
+.env.*
+
+# Build artifacts
+dist/
+build/
+target/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

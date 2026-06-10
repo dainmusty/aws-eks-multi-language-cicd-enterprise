@@ -1,0 +1,55 @@
+name: Release Summary
+
+on:
+
+  workflow_dispatch:
+
+jobs:
+
+  summary:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout Repository
+
+        uses: actions/checkout@v4
+
+      - name: Release Information
+
+        run: |
+
+          echo "====================================="
+          echo "POLYGLOT MICROSERVICES RELEASE REPORT"
+          echo "====================================="
+
+          echo ""
+          echo "Latest Commit:"
+          git log -1 --oneline
+
+          echo ""
+          echo "Changed Files:"
+          git diff-tree --no-commit-id --name-only -r HEAD
+
+          echo ""
+          echo "GitOps Applications"
+
+          find gitops -type f
+
+          echo ""
+          echo "Deployment Strategy"
+          echo "Dev      -> Auto Deploy"
+          echo "Staging  -> Approval Required"
+          echo "Production -> Two Approvals + Manual Promotion"
+
+          echo ""
+          echo "Managed By:"
+          echo "Terraform"
+          echo "GitHub Actions"
+          echo "Amazon ECR"
+          echo "Helm"
+          echo "ArgoCD"
+
+          echo ""
+          echo "Release Summary Complete"

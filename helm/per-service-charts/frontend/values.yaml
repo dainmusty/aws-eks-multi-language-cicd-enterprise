@@ -1,0 +1,288 @@
+############################################################
+# DEFAULT VALUES
+#
+# PURPOSE:
+# Base configuration for the JavaScript API microservice.
+#
+# Environment-specific overrides:
+# - values-dev.yaml
+# - values-staging.yaml
+# - values-production.yaml
+#
+# ENTERPRISE DESIGN:
+# - reusable
+# - environment-driven
+# - GitOps friendly
+############################################################
+
+############################################################
+# REPLICA CONFIGURATION
+############################################################
+
+replicaCount: 2
+
+############################################################
+# CONTAINER IMAGE CONFIGURATION
+############################################################
+
+image:
+  repository: dainmusty/react-dashboard
+
+  # Updated dynamically by GitHub Actions deploy pipeline
+  tag: "dev-latest16"
+
+  pullPolicy: IfNotPresent
+
+############################################################
+# IMAGE PULL SECRETS
+############################################################
+
+imagePullSecrets: []
+
+############################################################
+# OVERRIDE NAMES
+############################################################
+
+nameOverride: ""
+fullnameOverride: ""
+
+############################################################
+# SERVICE ACCOUNT
+############################################################
+
+serviceAccount:
+
+  # Create dedicated service account
+  create: true
+
+  # Optional annotations for IAM Roles for Service Accounts
+  annotations: {}
+
+  name: ""
+
+############################################################
+# POD ANNOTATIONS
+############################################################
+
+podAnnotations: {}
+
+############################################################
+# POD LABELS
+############################################################
+
+podLabels:
+  app: react-dashboard-dev
+
+############################################################
+# POD SECURITY CONTEXT
+############################################################
+
+podSecurityContext:
+  fsGroup: 1000
+
+############################################################
+# CONTAINER SECURITY CONTEXT
+############################################################
+
+securityContext:
+
+  runAsNonRoot: true
+
+  runAsUser: 1000
+
+  allowPrivilegeEscalation: false
+
+  capabilities:
+    drop:
+      - ALL
+
+############################################################
+# SERVICE CONFIGURATION
+############################################################
+
+service:
+
+  type: ClusterIP
+
+  port: 80
+
+  targetPort: 80
+
+############################################################
+# INGRESS CONFIGURATION
+############################################################
+
+ingress:
+
+  enabled: false
+
+  className: alb
+
+  annotations:
+
+    kubernetes.io/ingress.class: alb
+
+    alb.ingress.kubernetes.io/scheme: internet-facing
+
+    alb.ingress.kubernetes.io/target-type: ip
+
+    alb.ingress.kubernetes.io/healthcheck-path: /health
+
+  hosts:
+    - host: react-dashboard.example.com
+
+      paths:
+        - path: /
+          pathType: Prefix
+
+  tls: []
+
+############################################################
+# RESOURCE LIMITS & REQUESTS
+############################################################
+
+resources:
+
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+  requests:
+    cpu: 200m
+    memory: 256Mi
+
+############################################################
+# HEALTH ENDPOINT CONFIGURATION
+#
+# PURPOSE:
+# Used dynamically by:
+# - liveness probes
+# - readiness probes
+# - Helm test connections
+#
+
+############################################################
+health:
+
+  endpoint: /health
+############################################################
+# HEALTH PROBES
+############################################################
+
+livenessProbe:
+
+  httpGet:
+    path: /health
+    port: 80
+
+  initialDelaySeconds: 30
+  periodSeconds: 10
+
+readinessProbe:
+
+  httpGet:
+    path: /health
+    port: 80
+
+  initialDelaySeconds: 10
+  periodSeconds: 5
+
+############################################################
+# HORIZONTAL POD AUTOSCALER
+############################################################
+
+autoscaling:
+
+  enabled: true
+
+  minReplicas: 2
+
+  maxReplicas: 5
+
+  targetCPUUtilizationPercentage: 70
+
+############################################################
+# NODE SCHEDULING
+############################################################
+
+nodeSelector: {}
+
+############################################################
+# TOLERATIONS
+############################################################
+
+tolerations: []
+
+############################################################
+# AFFINITY RULES
+############################################################
+
+affinity: {}
+
+############################################################
+# POD DISRUPTION BUDGET
+############################################################
+
+podDisruptionBudget:
+
+  enabled: true
+
+  minAvailable: 1
+
+############################################################
+# NETWORK POLICY
+############################################################
+
+networkPolicy:
+
+  enabled: true
+
+  ingress:
+    enabled: false
+
+  egress:
+    enabled: true
+
+############################################################
+# ENVIRONMENT VARIABLES
+############################################################
+
+env:
+
+  NODE_ENV: production
+
+  PORT: "3000"
+
+############################################################
+# CONFIGMAP DATA
+############################################################
+
+config:
+
+  nodeEnv: "production"
+  logLevel: "info"
+
+############################################################
+# SECRET VALUES
+#
+# DO NOT COMMIT REAL VALUES.
+#
+# Use:
+# - External Secrets
+# - AWS Secrets Manager
+# - Sealed Secrets
+############################################################
+
+secrets:
+
+  DATABASE_URL: ""
+
+  API_KEY: ""
+
+############################################################
+# TESTS
+############################################################
+
+tests:
+
+  enabled: true

@@ -1,0 +1,300 @@
+############################################################
+# DEFAULT VALUES
+#
+# PURPOSE:
+# Base configuration for the Rust Processor microservice.
+#
+# Environment-specific overrides:
+# - values-dev.yaml
+# - values-staging.yaml
+# - values-production.yaml
+#
+# ENTERPRISE DESIGN:
+# - reusable
+# - environment-driven
+# - GitOps friendly
+############################################################
+
+############################################################
+# REPLICA CONFIGURATION
+############################################################
+
+replicaCount: 2
+
+############################################################
+# CONTAINER IMAGE CONFIGURATION
+############################################################
+
+image:
+  repository: dainmusty/rust-processor
+
+  # Updated dynamically by GitHub Actions deploy pipeline
+  tag: "dev-18345a5bf439a3237e42a15175710297dd22e8ea"
+
+  pullPolicy: IfNotPresent
+
+############################################################
+# IMAGE PULL SECRETS
+############################################################
+
+imagePullSecrets: []
+
+############################################################
+# OVERRIDE NAMES
+############################################################
+
+nameOverride: ""
+fullnameOverride: ""
+
+############################################################
+# SERVICE ACCOUNT
+############################################################
+
+serviceAccount:
+
+  # Create dedicated service account
+  create: true
+
+  # Optional annotations for IAM Roles for Service Accounts
+  annotations: {}
+
+  name: ""
+
+############################################################
+# POD ANNOTATIONS
+############################################################
+
+podAnnotations: {}
+
+############################################################
+# POD LABELS
+############################################################
+
+podLabels:
+  app: rust-processor
+
+############################################################
+# POD SECURITY CONTEXT
+############################################################
+
+podSecurityContext:
+  fsGroup: 1000
+
+############################################################
+# CONTAINER SECURITY CONTEXT
+############################################################
+
+securityContext:
+
+  runAsNonRoot: true
+
+  runAsUser: 1000
+
+  allowPrivilegeEscalation: false
+
+  capabilities:
+    drop:
+      - ALL
+
+############################################################
+# SERVICE CONFIGURATION
+############################################################
+
+service:
+
+  type: ClusterIP
+
+  port: 80
+
+  targetPort: 8081
+
+############################################################
+# INGRESS CONFIGURATION
+############################################################
+
+ingress:
+
+  enabled: false
+
+  className: alb
+
+  annotations:
+
+    kubernetes.io/ingress.class: alb
+
+    alb.ingress.kubernetes.io/scheme: internet-facing
+
+    alb.ingress.kubernetes.io/target-type: ip
+
+    alb.ingress.kubernetes.io/healthcheck-path: /health
+
+  hosts:
+    - host: rust-processor.example.com
+
+      paths:
+        - path: /
+          pathType: Prefix
+
+  tls: []
+
+############################################################
+# RESOURCE LIMITS & REQUESTS
+#
+# Rust applications are highly memory efficient
+# and typically consume lower CPU than JVM workloads.
+############################################################
+
+resources:
+
+  limits:
+    cpu: "300m"
+    memory: "256Mi"
+
+  requests:
+    cpu: "100m"
+    memory: "128Mi"
+
+############################################################
+# HEALTH ENDPOINT CONFIGURATION
+#
+# PURPOSE:
+# Used dynamically by:
+# - liveness probes
+# - readiness probes
+# - Helm test connections
+#
+# Rust services commonly expose:
+# /health
+############################################################
+
+health:
+
+  endpoint: /health
+
+############################################################
+# HEALTH PROBES
+############################################################
+
+livenessProbe:
+
+  httpGet:
+    path: /health
+    port: 8081
+
+  initialDelaySeconds: 15
+  periodSeconds: 10
+
+readinessProbe:
+
+  httpGet:
+    path: /health
+    port: 8081
+
+  initialDelaySeconds: 5
+  periodSeconds: 5
+
+############################################################
+# HORIZONTAL POD AUTOSCALER
+#
+# Rust services scale aggressively due to:
+# - fast startup time
+# - low resource usage
+# - async runtime efficiency
+############################################################
+
+autoscaling:
+
+  enabled: true
+
+  minReplicas: 2
+
+  maxReplicas: 10
+
+  targetCPUUtilizationPercentage: 75
+
+############################################################
+# NODE SCHEDULING
+############################################################
+
+nodeSelector: {}
+
+############################################################
+# TOLERATIONS
+############################################################
+
+tolerations: []
+
+############################################################
+# AFFINITY RULES
+############################################################
+
+affinity: {}
+
+############################################################
+# POD DISRUPTION BUDGET
+############################################################
+
+podDisruptionBudget:
+
+  enabled: true
+
+  minAvailable: 1
+
+############################################################
+# NETWORK POLICY
+############################################################
+
+networkPolicy:
+
+  enabled: true
+
+  ingress:
+    enabled: true
+
+  egress:
+    enabled: true
+
+############################################################
+# ENVIRONMENT VARIABLES
+############################################################
+
+env:
+
+  APP_ENV: production
+
+  PORT: "8081"
+
+############################################################
+# CONFIGMAP DATA
+############################################################
+
+config:
+
+  rustLog: "info"
+
+  appEnv: "production"
+
+############################################################
+# SECRET VALUES
+#
+# DO NOT COMMIT REAL VALUES.
+#
+# Use:
+# - External Secrets
+# - AWS Secrets Manager
+# - Sealed Secrets
+############################################################
+
+secrets:
+
+  DATABASE_URL: ""
+
+  API_KEY: ""
+
+############################################################
+# TESTS
+############################################################
+
+tests:
+
+  enabled: true

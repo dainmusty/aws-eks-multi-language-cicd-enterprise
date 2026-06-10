@@ -1,0 +1,42 @@
+############################################################
+# SERVER CONFIGURATION
+############################################################
+
+server:
+  port: 8080
+
+############################################################
+# SPRING APPLICATION
+############################################################
+
+spring:
+  application:
+    name: java-service
+
+############################################################
+# ACTUATOR
+#
+# Required for:
+# - Kubernetes probes
+# - ALB health checks
+# - Prometheus monitoring
+############################################################
+
+management:
+
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+  health:
+    livenessstate:
+      enabled: true
+
+    readinessstate:
+      enabled: true
