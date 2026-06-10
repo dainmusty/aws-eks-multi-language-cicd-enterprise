@@ -1,10 +1,10 @@
 ############################################################
-# JAVA MICROSERVICE CI
+# RUST MICROSERVICE CI
 #
 # PURPOSE:
-# - Build Spring Boot application
+# - Build Rust application
 # - Run tests
-# - Package JAR
+# - Run linting
 # - Build Docker image
 # - Push image to ECR
 #
@@ -13,13 +13,13 @@
 # .github/workflows/security-scanning.yml
 #
 # ENTERPRISE DESIGN:
-# - OIDC authentication
-# - Maven dependency caching
-# - Immutable image tags
+# - Cargo caching
 # - Branch-aware security
+# - OIDC authentication
+# - Immutable image tags
 ############################################################
 
-name: Java CI
+name: Rust CI
 
 ############################################################
 # TRIGGERS
@@ -35,7 +35,7 @@ on:
       - main
 
     paths:
-      - "polyglot-microservices/backend/java-service/**"
+      - "polyglot-microservices/backend/rust-processor/**"
 
   pull_request:
 
@@ -43,7 +43,7 @@ on:
       - main
 
     paths:
-      - "polyglot-microservices/backend/java-service/**"
+      - "polyglot-microservices/backend/rust-processor/**"
 
 ############################################################
 # GLOBAL VARIABLES
@@ -51,10 +51,10 @@ on:
 
 env:
   AWS_REGION: us-east-1
-  IMAGE_NAME: java-service
+  IMAGE_NAME: rust-processor
   DOCKER_REPOSITORY: dainmusty  # Docker Hub repository name
-  SERVICE_PATH: polyglot-microservices/backend/java-service
-  DOCKERFILE_PATH: polyglot-microservices/backend/java-service/Dockerfile
+  SERVICE_PATH: polyglot-microservices/backend/rust-processor
+  DOCKERFILE_PATH: polyglot-microservices/backend/rust-processor/Dockerfile
 
 ############################################################
 # JOBS
@@ -113,15 +113,10 @@ jobs:
 ############################################################
 
   build-test-package-push:
-
     needs: security
-
     runs-on: ubuntu-latest
-
     permissions:
-
       contents: read
-
       id-token: write
 
     steps:
@@ -129,53 +124,77 @@ jobs:
 ############################################################
 # CHECKOUT
 ############################################################
-
       - name: Checkout Repository
-
         uses: actions/checkout@v4
 
 ############################################################
-# JAVA SETUP
+# RUST TOOLCHAIN
 ############################################################
 
-      - name: Setup Java
+      - name: Setup Rust
 
-        uses: actions/setup-java@v4
+        uses: dtolnay/rust-toolchain@stable
+
+############################################################
+# CACHE CARGO
+############################################################
+
+      - name: Cache Cargo Dependencies
+
+        uses: actions/cache@v4
 
         with:
 
-          distribution: temurin
+          path: |
+            ~/.cargo/bin
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
 
-          java-version: "17"
-
-          cache: maven
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
 ############################################################
-# BUILD APPLICATION
+# FORMAT CHECK
 ############################################################
 
-      - name: Build Application
+      - name: Rust Format Check
 
         working-directory: ${{ env.SERVICE_PATH }}
 
-        run: |
-
-          mvn clean verify
+        run: cargo fmt --check
 
 ############################################################
-# PACKAGE JAR
+# CLIPPY LINTING
 ############################################################
 
-      - name: Package Spring Boot JAR
+      - name: Run Clippy
 
         working-directory: ${{ env.SERVICE_PATH }}
 
-        run: |
-
-          mvn package -DskipTests
+        run: cargo clippy -- -D warnings
 
 ############################################################
- # DOCKER AUTHENTICATION, BUILD, SCAN, AND PUSH
+# UNIT TESTS
+############################################################
+
+      - name: Run Unit Tests
+
+        working-directory: ${{ env.SERVICE_PATH }}
+
+        run: cargo test
+
+############################################################
+# RELEASE BUILD
+############################################################
+
+      - name: Build Release Binary
+
+        working-directory: ${{ env.SERVICE_PATH }}
+
+        run: cargo build --release
+
+############################################################
+# DOCKER AUTHENTICATION, BUILD, SCAN, AND PUSH
 ############################################################
 
       - name: Login to Docker Hub
@@ -212,8 +231,7 @@ jobs:
         run: |
           docker push ${{ env.DOCKER_REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
           docker push ${{ env.DOCKER_REPOSITORY }}/${{ env.IMAGE_NAME }}:latest
-          
-          
+
 ############################################################
 # BUILD ARTIFACTS
 ############################################################
@@ -226,12 +244,9 @@ jobs:
 
         with:
 
-          name: java-build-artifacts
+          name: rust-build-artifacts
 
           path: |
-            polyglot-microservices/backend/java-service/target/*.jar
+            polyglot-microservices/backend/rust-processor/target/release/
 
           retention-days: 7
-
-
-          
