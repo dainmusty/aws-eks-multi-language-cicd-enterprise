@@ -1,0 +1,84 @@
+name: Deploy STAGING
+
+on:
+
+  push:
+
+    branches:
+      - staging
+
+permissions:
+  contents: write
+
+jobs:
+
+  deploy-staging:
+
+    runs-on: ubuntu-latest
+
+    environment:
+
+      name: staging
+
+    steps:
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      #####################################################
+      # Update staging tags
+      #####################################################
+
+      - name: Update JavaScript STAGING Tag
+        run: |
+          sed -i \
+          "s/tag:.*/tag: \"staging-${GITHUB_SHA}\"/" \
+          helm/per-service-charts/backend/javascript-api-service/values.yaml
+
+      - name: Update Java STAGING Tag
+        run: |
+          sed -i \
+          "s/tag:.*/tag: \"staging-${GITHUB_SHA}\"/" \
+          helm/per-service-charts/backend/java-service/values.yaml
+
+      - name: Update Rust STAGING Tag
+        run: |
+          sed -i \
+          "s/tag:.*/tag: \"staging-${GITHUB_SHA}\"/" \
+          helm/per-service-charts/backend/rust-processor/values.yaml
+
+      #####################################################
+      # Commit GitOps changes
+      #####################################################
+
+      - name: Commit Changes
+        run: |
+
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+
+          git add .
+
+          git commit -m \
+          "STAGING deployment ${GITHUB_SHA}" \
+          || echo "No changes"
+
+      - name: Push Changes
+        run: git push
+
+      #####################################################
+      # Smoke tests placeholder
+      #####################################################
+
+      - name: Staging Validation
+        run: |
+          echo "Run smoke tests here"
+          echo "Run integration tests here"
+
+      - name: Deployment Summary
+        run: |
+          echo "STAGING deployment complete"
+          echo "Awaiting promotion to production"

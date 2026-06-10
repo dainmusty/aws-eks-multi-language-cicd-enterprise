@@ -1,0 +1,135 @@
+############################################################
+# DEVELOPMENT ENVIRONMENT VALUES
+#
+# PURPOSE:
+# Optimized for fast iteration, low cost,
+# and developer productivity.
+#
+# TRADE-OFFS:
+# - Lower availability guarantees
+# - Minimal resource allocation
+# - Disabled autoscaling (optional)
+############################################################
+
+replicaCount: 1
+
+############################################################
+# IMAGE CONFIGURATION
+############################################################
+
+image:
+  repository: dainmusty/java-service
+  tag: dev-latest2
+  pullPolicy: IfNotPresent
+
+############################################################
+# SERVICE CONFIGURATION
+############################################################
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8080
+
+############################################################
+# APPLICATION CONFIGURATION (CONFIGMAP)
+############################################################
+
+config:
+
+  nodeEnv: "development"
+
+  logLevel: "debug"
+
+  apiPort: "3000"
+
+  javaServiceUrl: "http://java-service"
+
+  rustProcessorUrl: "http://rust-processor"
+
+  enableMetrics: "false"
+
+  enableTracing: "false"
+
+############################################################
+# SECRETS (DEV ONLY - NOT PRODUCTION SAFE)
+############################################################
+
+secrets:
+
+  databaseUrl: "postgres://dev-db:5432/app"
+
+  databaseUsername: "dev_user"
+
+  databasePassword: "dev_password"
+
+  jwtSecret: "dev_jwt_secret"
+
+  apiKey: "dev_api_key"
+
+############################################################
+# AUTOSCALING (DISABLED IN DEV)
+############################################################
+
+autoscaling:
+  enabled: false
+
+############################################################
+# POD DISRUPTION BUDGET (DISABLED FOR DEV)
+############################################################
+
+podDisruptionBudget:
+  enabled: false
+
+############################################################
+# NETWORK POLICY (RELAXED FOR DEV)
+############################################################
+
+networkPolicy:
+  enabled: false
+
+############################################################
+# INGRESS (OPTIONAL IN DEV)
+############################################################
+
+ingress:
+  enabled: false
+
+############################################################
+# RESOURCES (MINIMAL FOR DEV)
+############################################################
+
+resources:
+  requests:
+    cpu: "100m"
+    memory: "128Mi"
+
+  limits:
+    cpu: "250m"
+    memory: "256Mi"
+
+############################################################
+# SERVICE ACCOUNT
+############################################################
+
+serviceAccount:
+  create: true
+  annotations: {}
+
+############################################################
+# POD SETTINGS
+############################################################
+
+podSecurityContext: {}
+
+securityContext: {}
+
+############################################################
+# NODE PLACEMENT
+############################################################
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

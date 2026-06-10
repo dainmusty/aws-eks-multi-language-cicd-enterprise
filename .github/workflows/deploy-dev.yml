@@ -1,0 +1,75 @@
+name: Deploy DEV
+
+on:
+
+  push:
+
+    branches:
+      - dev
+
+permissions:
+  contents: write
+
+jobs:
+
+  update-dev-gitops:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      #####################################################
+      # Update DEV image tags
+      #####################################################
+
+      - name: Update JavaScript DEV Tag
+        run: |
+          sed -i \
+          "s/tag:.*/tag: \"dev-${GITHUB_SHA}\"/" \
+          helm/per-service-charts/javascript-api-service/values.yaml
+
+      - name: Update Java DEV Tag
+        run: |
+          sed -i \
+          "s/tag:.*/tag: \"dev-${GITHUB_SHA}\"/" \
+          helm/per-service-charts/java-service/values.yaml
+
+      - name: Update Rust DEV Tag
+        run: |
+          sed -i \
+          "s/tag:.*/tag: \"dev-${GITHUB_SHA}\"/" \
+          helm/per-service-charts/rust-service/values.yaml
+
+      #####################################################
+      # Commit changes
+      #####################################################
+
+      - name: Commit GitOps Updates
+        run: |
+
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+
+          git add .
+
+          git commit -m \
+          "DEV deployment ${GITHUB_SHA}" \
+          || echo "No changes"
+
+      - name: Push Changes
+        run: git push
+
+      #####################################################
+      # ArgoCD Sync Info
+      #####################################################
+
+      - name: Deployment Summary
+        run: |
+          echo "DEV deployment triggered"
+          echo "ArgoCD will reconcile automatically"

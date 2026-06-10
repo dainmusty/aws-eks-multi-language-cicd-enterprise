@@ -1,0 +1,210 @@
+############################################################
+# TERRAFORM APPLY WORKFLOW
+#
+# PURPOSE:
+# - Deploy approved infrastructure changes
+# - Apply Terraform plans safely per environment
+# - Enforce manual approval gates (GitHub Environments)
+#
+# ENTERPRISE FEATURES:
+# - Manual approvals (dev/staging/prod)
+# - OIDC authentication (no AWS keys)
+# - Environment isolation
+# - Optional plan artifact usage
+# - Production safety controls
+# - Audit-friendly execution
+############################################################
+
+name: Terraform Apply
+
+############################################################
+# WORKFLOW TRIGGER
+#
+# APPLY MUST NEVER RUN ON EVERY PUSH
+#
+# Only manually triggered or controlled execution.
+############################################################
+
+on:
+
+  workflow_dispatch:
+
+    ########################################################
+    # INPUT PARAMETER FOR ENVIRONMENT SELECTION
+    ########################################################
+
+    inputs:
+
+      environment:
+        description: "Target environment (dev | staging | prod)"
+        required: true
+        type: choice
+
+        options:
+          - dev
+          - staging
+          - prod
+
+############################################################
+# WORKFLOW PERMISSIONS
+############################################################
+
+permissions:
+  id-token: write
+  contents: read
+
+############################################################
+# GLOBAL VARIABLES
+############################################################
+
+env:
+  TF_VERSION: "1.12.2"
+  AWS_REGION: us-east-1
+
+############################################################
+# JOBS
+############################################################
+
+jobs:
+
+  ##########################################################
+  # TERRAFORM APPLY JOB
+  ##########################################################
+
+  terraform-apply:
+
+    name: Terraform Apply (${{ inputs.environment }})
+
+    runs-on: ubuntu-latest
+
+    ########################################################
+    # GITHUB ENVIRONMENT PROTECTION
+    #
+    # THIS IS THE MOST IMPORTANT PART OF THE PIPELINE
+    #
+    # Configure in GitHub:
+    # - dev: auto-approve
+    # - staging: 1 approval
+    # - prod: 2 approvals + restricted users
+    ########################################################
+
+    environment:
+      name: ${{ inputs.environment }}
+
+    ########################################################
+    # WORKING DIRECTORY PER ENVIRONMENT
+    ########################################################
+
+    defaults:
+      run:
+        working-directory: terraform/environments/${{ inputs.environment }}
+
+    steps:
+
+      ######################################################
+      # STEP 1 — CHECKOUT REPOSITORY
+      ######################################################
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      ######################################################
+      # STEP 2 — CONFIGURE AWS (OIDC AUTH)
+      #
+      # No AWS access keys required.
+      # Uses GitHub → AWS trust relationship.
+      ######################################################
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+
+        with:
+          role-to-assume: arn:aws:iam::123456789012:role/github-actions-role
+          aws-region: ${{ env.AWS_REGION }}
+
+      ######################################################
+      # STEP 3 — SETUP TERRAFORM
+      ######################################################
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      ######################################################
+      # STEP 4 — TERRAFORM INIT
+      #
+      # Connects to remote backend (S3 + DynamoDB lock)
+      ######################################################
+
+      - name: Terraform Init
+        run: terraform init
+
+      ######################################################
+      # STEP 5 — OPTIONAL PLAN DOWNLOAD
+      #
+      # In strict enterprise setups:
+      # Apply uses EXACT plan artifact from plan pipeline
+      #
+      # This ensures:
+      # - what was reviewed = what is deployed
+      ######################################################
+
+      - name: Download Terraform Plan Artifact (Optional)
+
+        uses: actions/download-artifact@v4
+
+        continue-on-error: true
+
+        with:
+          name: terraform-plan-${{ inputs.environment }}
+
+      ######################################################
+      # STEP 6 — SAFETY CHECK
+      #
+      # Prevent accidental production execution
+      ######################################################
+
+      - name: Safety Check for Production
+
+        if: inputs.environment == 'prod'
+
+        run: |
+          echo "Production deployment detected"
+          echo "Ensure approvals are completed in GitHub Environments"
+          sleep 5
+
+      ######################################################
+      # STEP 7 — TERRAFORM APPLY
+      #
+      # Applies infrastructure changes
+      #
+      # Enterprise logic:
+      # - If tfplan exists → apply it
+      # - Else → fallback to direct apply
+      ######################################################
+
+      - name: Terraform Apply
+
+        run: |
+
+          if [ -f tfplan ]; then
+            echo "Applying saved Terraform plan..."
+            terraform apply -auto-approve tfplan
+          else
+            echo "No plan artifact found. Running direct apply..."
+            terraform apply -auto-approve
+          fi
+
+      ######################################################
+      # STEP 8 — APPLY SUMMARY
+      ######################################################
+
+      - name: Apply Summary
+
+        run: |
+          echo "Terraform Apply Completed"
+          echo "Environment: ${{ inputs.environment }}"
+          echo "Executed by: ${{ github.actor }}"
+          echo "Commit: ${{ github.sha }}"

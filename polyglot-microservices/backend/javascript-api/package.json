@@ -1,0 +1,29 @@
+{
+  "name": "javascript-api",
+  "version": "1.0.0",
+  "description": "JavaScript microservice API",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "test": "jest",
+    "lint": "eslint src/",
+    "ci:test": "npm run lint && npm run test"
+  },
+  "dependencies": {
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "helmet": "^7.0.0",
+    "morgan": "^1.10.0",
+    "picomatch": "^4.0.4"
+  },
+  "devDependencies": {
+    "eslint": "^10.4.1",
+    "globals": "^17.6.0",
+    "jest": "^29.5.0",
+    "nodemon": "^3.1.14"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

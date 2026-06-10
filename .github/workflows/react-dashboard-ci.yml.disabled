@@ -1,0 +1,258 @@
+############################################################
+# React Dashboard MICROSERVICE CI PIPELINE
+#
+# PURPOSE:
+# Enterprise CI pipeline for:
+# - Linting
+# - Unit Testing
+# - Dependency Scanning
+# - Docker Build
+# - Container Scanning
+# - ECR Push
+#
+# SERVICE:
+# services/react-dashboard
+#
+# TRIGGER:
+# Runs only when React Dashboard service changes.
+############################################################
+
+name: React Dashboard CI
+
+############################################################
+# TRIGGERS
+############################################################
+
+on:
+
+  push:
+
+    branches:
+      - dev
+      - staging
+      - main
+
+    paths:
+      - "polyglot-microservices/frontend/react-dashboard/**"
+
+  pull_request:
+
+    branches:
+      - main
+
+    paths:
+      - "polyglot-microservices/frontend/react-dashboard/**"
+
+############################################################
+# ENVIRONMENT VARIABLES
+############################################################
+
+env:
+
+  AWS_REGION: us-east-1
+
+  ECR_REPOSITORY: polyglot/react-dashboard
+
+  SERVICE_PATH: polyglot-microservices/frontend/react-dashboard
+
+############################################################
+# JOBS
+############################################################
+
+jobs:
+############################################################
+# DETERMINE SECURITY LEVEL
+############################################################
+
+  determine-scan-level:
+
+    runs-on: ubuntu-latest
+
+    outputs:
+
+      scan-level: ${{ steps.level.outputs.scan-level }}
+
+    steps:
+
+      - name: Determine Scan Level
+
+        id: level
+
+        run: |
+
+          if [[ "${GITHUB_REF}" == "refs/heads/main" ]]; then
+            echo "scan-level=full" >> $GITHUB_OUTPUT
+
+          elif [[ "${GITHUB_REF}" == "refs/heads/staging" ]]; then
+            echo "scan-level=comprehensive" >> $GITHUB_OUTPUT
+
+          else
+            echo "scan-level=fast" >> $GITHUB_OUTPUT
+          fi
+
+############################################################
+# SECURITY WORKFLOW
+############################################################
+
+  security:
+
+    needs: determine-scan-level
+
+    uses: ./.github/workflows/security-scanning.yml
+
+    with:
+
+      scan-level: ${{ needs.determine-scan-level.outputs.scan-level }}
+
+    secrets: inherit
+
+############################################################
+# BUILD / TEST / PACKAGE / PUSH
+############################################################
+
+  build-test-scan-push:
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      security-events: write
+      id-token: write
+
+    steps:
+
+    ########################################################
+    # CHECKOUT SOURCE CODE
+    ########################################################
+
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    ########################################################
+    # JAVASCRIPT - TOOLCHAIN - SETUP NODE.JS
+    ########################################################
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+
+      with:
+        node-version: "20"
+
+        cache: npm
+
+        cache-dependency-path: |
+          polyglot-microservices/frontend/react-dashboard/package-lock.json
+
+    ########################################################
+    # INSTALL DEPENDENCIES
+    ########################################################
+
+    - name: Install Dependencies
+
+      working-directory: ${{ env.SERVICE_PATH }}
+
+      run: npm ci
+
+    ########################################################
+    # JAVASCRIPT - ESLINT
+    #
+    # Fails pipeline if linting issues exist.
+    ########################################################
+
+    - name: Run ESLint
+
+      working-directory: ${{ env.SERVICE_PATH }}
+
+      run: npm run lint
+
+    ########################################################
+    # JAVASCRIPT - UNIT TESTS
+    ########################################################
+
+    - name: Run Unit Tests
+
+      working-directory: ${{ env.SERVICE_PATH }}
+
+      run: npm test
+
+    
+    ########################################################
+    # JAVASCRIPT - BUILD STEP
+    #
+    # Not required.
+    # Service runs directly via Node.js.
+    ########################################################
+
+    - name: Skip Build Step
+      run: echo "No build stage required for React Dashboard service."
+
+    ########################################################
+    # JAVASCRIPT - AWS AUTHENTICATION
+    #
+    # Uses GitHub OIDC.
+    ########################################################
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: ${{ secrets.AWS_GITHUB_ROLE_ARN }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    ########################################################
+    # JAVASCRIPT - LOGIN TO ECR
+    ########################################################
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+
+    ########################################################
+    # JAVASCRIPT - BUILD IMAGE
+    ########################################################
+
+    - name: Build Docker Image
+      working-directory: ${{ env.SERVICE_PATH }}
+      run: |
+        docker build \
+          -t ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }} \
+          -t ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest \
+          .
+
+    ########################################################
+    # JAVASCRIPT - TRIVY IMAGE SCAN
+    #
+    # Fails on HIGH/CRITICAL vulnerabilities.
+    ########################################################
+
+    - name: Scan Docker Image
+      uses: aquasecurity/trivy-action@0.28.0
+      with:
+        image-ref: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+        format: table
+        severity: HIGH,CRITICAL
+        exit-code: "1"
+        ignore-unfixed: true
+
+    ########################################################
+    # JAVASCRIPT - PUSH IMAGE TO ECR
+    ########################################################
+
+    - name: Push Docker Image
+      run: |
+        docker push \
+          ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+        docker push \
+          ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest
+
+    ########################################################
+    # JAVASCRIPT - SAVE TEST REPORTS (OPTIONAL)
+    ########################################################
+
+    - name: Upload Artifacts
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: react-dashboard-ci-artifacts
+        path: |
+          polyglot-microservices/frontend/react-dashboard/package.json
+        retention-days: 7

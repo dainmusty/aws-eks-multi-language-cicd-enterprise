@@ -1,0 +1,252 @@
+############################################################
+# RUST MICROSERVICE CI
+#
+# PURPOSE:
+# - Build Rust application
+# - Run tests
+# - Run linting
+# - Build Docker image
+# - Push image to ECR
+#
+# SECURITY:
+# Delegated to reusable workflow:
+# .github/workflows/security-scanning.yml
+#
+# ENTERPRISE DESIGN:
+# - Cargo caching
+# - Branch-aware security
+# - OIDC authentication
+# - Immutable image tags
+############################################################
+
+name: Rust CI
+
+############################################################
+# TRIGGERS
+############################################################
+
+on:
+
+  push:
+
+    branches:
+      - dev
+      - staging
+      - main
+
+    paths:
+      - "polyglot-microservices/backend/rust-processor/**"
+
+  pull_request:
+
+    branches:
+      - main
+
+    paths:
+      - "polyglot-microservices/backend/rust-processor/**"
+
+############################################################
+# GLOBAL VARIABLES
+############################################################
+
+env:
+  AWS_REGION: us-east-1
+  IMAGE_NAME: rust-processor
+  DOCKER_REPOSITORY: dainmusty  # Docker Hub repository name
+  SERVICE_PATH: polyglot-microservices/backend/rust-processor
+  DOCKERFILE_PATH: polyglot-microservices/backend/rust-processor/Dockerfile
+
+############################################################
+# JOBS
+############################################################
+
+jobs:
+
+############################################################
+# DETERMINE SECURITY LEVEL
+############################################################
+
+  determine-scan-level:
+
+    runs-on: ubuntu-latest
+
+    outputs:
+
+      scan-level: ${{ steps.level.outputs.scan-level }}
+
+    steps:
+
+      - name: Determine Scan Level
+
+        id: level
+
+        run: |
+
+          if [[ "${GITHUB_REF}" == "refs/heads/main" ]]; then
+            echo "scan-level=full" >> $GITHUB_OUTPUT
+
+          elif [[ "${GITHUB_REF}" == "refs/heads/staging" ]]; then
+            echo "scan-level=comprehensive" >> $GITHUB_OUTPUT
+
+          else
+            echo "scan-level=fast" >> $GITHUB_OUTPUT
+          fi
+
+############################################################
+# SECURITY WORKFLOW
+############################################################
+
+  security:
+
+    needs: determine-scan-level
+
+    uses: ./.github/workflows/security-scanning.yml
+
+    with:
+
+      scan-level: ${{ needs.determine-scan-level.outputs.scan-level }}
+
+    secrets: inherit
+
+############################################################
+# BUILD / TEST / PACKAGE / PUSH
+############################################################
+
+  build-test-package-push:
+    needs: security
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+
+############################################################
+# CHECKOUT
+############################################################
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+############################################################
+# RUST TOOLCHAIN
+############################################################
+
+      - name: Setup Rust
+
+        uses: dtolnay/rust-toolchain@stable
+
+############################################################
+# CACHE CARGO
+############################################################
+
+      - name: Cache Cargo Dependencies
+
+        uses: actions/cache@v4
+
+        with:
+
+          path: |
+            ~/.cargo/bin
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+############################################################
+# FORMAT CHECK
+############################################################
+
+      - name: Rust Format Check
+
+        working-directory: ${{ env.SERVICE_PATH }}
+
+        run: cargo fmt --check
+
+############################################################
+# CLIPPY LINTING
+############################################################
+
+      - name: Run Clippy
+
+        working-directory: ${{ env.SERVICE_PATH }}
+
+        run: cargo clippy -- -D warnings
+
+############################################################
+# UNIT TESTS
+############################################################
+
+      - name: Run Unit Tests
+
+        working-directory: ${{ env.SERVICE_PATH }}
+
+        run: cargo test
+
+############################################################
+# RELEASE BUILD
+############################################################
+
+      - name: Build Release Binary
+
+        working-directory: ${{ env.SERVICE_PATH }}
+
+        run: cargo build --release
+
+############################################################
+# DOCKER AUTHENTICATION, BUILD, SCAN, AND PUSH
+############################################################
+
+      - name: Login to Docker Hub
+        run: |
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Build Docker Image
+        run: |
+          docker build \
+            -f ${{ env.DOCKERFILE_PATH }} \
+            -t ${{ env.DOCKER_REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+            -t ${{ env.DOCKER_REPOSITORY }}/${{ env.IMAGE_NAME }}:latest \
+            ${{ env.SERVICE_PATH }}
+
+
+      - name: Verify Docker Image Exists
+        run: |
+          docker images
+          docker image inspect ${{ env.DOCKER_REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+
+      - name: Scan Docker Image
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{ env.DOCKER_REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}'
+          format: table
+          severity: HIGH,CRITICAL
+          exit-code: '0'
+          ignore-unfixed: true
+          scanners: vuln
+          
+
+      - name: Push Docker Image
+        run: |
+          docker push ${{ env.DOCKER_REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          docker push ${{ env.DOCKER_REPOSITORY }}/${{ env.IMAGE_NAME }}:latest
+
+############################################################
+# BUILD ARTIFACTS
+############################################################
+
+      - name: Upload Build Artifacts
+
+        if: always()
+
+        uses: actions/upload-artifact@v4
+
+        with:
+
+          name: rust-build-artifacts
+
+          path: |
+            polyglot-microservices/backend/rust-processor/target/release/
+
+          retention-days: 7

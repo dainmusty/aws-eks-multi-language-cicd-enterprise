@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: rust-processor-production
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/dainmusty/aws-eks-multi-language-cicd-enterprise.git
+    targetRevision: main
+    path: helm/per-service-charts/rust-service
+    helm:
+      valueFiles:
+        - values.yaml
+        - values-production.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: polyglot-production
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

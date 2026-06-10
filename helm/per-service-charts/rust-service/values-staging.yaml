@@ -1,0 +1,163 @@
+############################################################
+# STAGING ENVIRONMENT VALUES
+#
+# PURPOSE:
+# Production-like environment used for:
+# - integration testing
+# - performance validation
+# - release candidate verification
+#
+# CHARACTERISTICS:
+# - Scaled down production replica
+# - Full feature parity with production
+# - Security policies enabled
+############################################################
+
+replicaCount: 2
+
+############################################################
+# IMAGE CONFIGURATION
+############################################################
+
+image:
+  repository: dainmusty/rust-processor
+  tag: staging-latest
+  pullPolicy: IfNotPresent
+
+############################################################
+# SERVICE CONFIGURATION
+############################################################
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8081
+
+############################################################
+# INGRESS (ENABLED IN STAGING)
+############################################################
+
+ingress:
+  enabled: false
+
+  className: nginx
+
+  hosts:
+    - host: staging.api.mycompany.com
+      paths:
+        - path: /
+          pathType: Prefix
+
+  tls:
+    - secretName: staging-api-tls
+      hosts:
+        - staging.api.mycompany.com
+
+############################################################
+# CONFIGURATION (PRODUCTION-LIKE SETTINGS)
+############################################################
+
+config:
+
+  nodeEnv: "staging"
+
+  logLevel: "info"
+
+  apiPort: "3000"
+
+  javaServiceUrl: "http://java-service"
+
+  rustProcessorUrl: "http://rust-processor"
+
+  enableMetrics: "true"
+
+  enableTracing: "true"
+
+############################################################
+# SECRETS (SIMULATED PRODUCTION)
+############################################################
+
+secrets:
+
+  databaseUrl: "postgres://staging-db:5432/app"
+
+  databaseUsername: "staging_user"
+
+  databasePassword: "staging_password"
+
+  jwtSecret: "staging_jwt_secret"
+
+  apiKey: "staging_api_key"
+
+############################################################
+# AUTOSCALING (ENABLED)
+############################################################
+
+autoscaling:
+  enabled: true
+
+  minReplicas: 2
+
+  maxReplicas: 5
+
+  targetCPUUtilizationPercentage: 70
+
+############################################################
+# POD DISRUPTION BUDGET (ENABLED)
+############################################################
+
+podDisruptionBudget:
+  enabled: true
+
+  minAvailable: 1
+
+############################################################
+# NETWORK POLICY (ENABLED - ZERO TRUST STARTS HERE)
+############################################################
+
+networkPolicy:
+  enabled: true
+
+############################################################
+# RESOURCES (MEDIUM LEVEL)
+############################################################
+
+resources:
+  requests:
+    cpu: "250m"
+    memory: "256Mi"
+
+  limits:
+    cpu: "500m"
+    memory: "512Mi"
+
+############################################################
+# SERVICE ACCOUNT (IRSA ENABLED)
+############################################################
+
+serviceAccount:
+  create: true
+
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::123456789012:role/javascript-api-staging-role
+
+############################################################
+# NODE SCHEDULING
+############################################################
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+############################################################
+# OBSERVABILITY FLAGS
+############################################################
+
+observability:
+  enabled: true
+
+  prometheusScraping: true
+
+  loggingLevel: structured

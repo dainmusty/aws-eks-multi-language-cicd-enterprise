@@ -1,0 +1,352 @@
+############################################################
+# TERRAFORM PLAN WORKFLOW
+#
+# PURPOSE:
+# - Validate Terraform code
+# - Run security scans
+# - Generate execution plans
+# - Upload plan artifacts
+# - Prevent bad infrastructure changes
+#
+# ENTERPRISE FEATURES:
+# - OIDC authentication (no AWS keys)
+# - Multi-environment validation
+# - Terraform plugin caching
+# - Path filtering
+# - Concurrency protection
+# - Artifact retention
+# - PR plan visibility
+############################################################
+
+name: Terraform Plan
+
+############################################################
+# WORKFLOW TRIGGERS
+############################################################
+
+on:
+
+  ##########################################################
+  # Pull Requests
+  #
+  # Runs when infrastructure changes are proposed.
+  ##########################################################
+
+  pull_request:
+    branches:
+      - develop
+      - main
+
+    paths:
+      - 'terraform/**'
+
+  ##########################################################
+  # Pushes
+  #
+  # Useful for validating direct pushes to protected branches.
+  ##########################################################
+
+  push:
+    branches:
+      - develop
+      - main
+
+    paths:
+      - 'terraform/**'
+
+############################################################
+# WORKFLOW PERMISSIONS
+#
+# id-token: required for AWS OIDC
+# contents: allows repo checkout
+# pull-requests: allows PR comments
+############################################################
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+
+############################################################
+# CONCURRENCY CONTROL
+#
+# Prevents multiple Terraform plans running simultaneously
+# on the same branch.
+############################################################
+
+concurrency:
+  group: terraform-plan-${{ github.ref }}
+  cancel-in-progress: true
+
+############################################################
+# GLOBAL ENVIRONMENT VARIABLES
+############################################################
+
+env:
+
+  ##########################################################
+  # Terraform version pinning
+  #
+  # Enterprise best practice:
+  # NEVER float Terraform versions.
+  ##########################################################
+
+  TF_VERSION: "1.12.2"
+
+  ##########################################################
+  # AWS region
+  ##########################################################
+
+  AWS_REGION: us-east-1
+
+  ##########################################################
+  # Terraform plugin cache
+  #
+  # Significantly speeds up CI runs by caching providers.
+  ##########################################################
+
+  TF_PLUGIN_CACHE_DIR: ~/.terraform.d/plugin-cache
+
+############################################################
+# JOBS
+############################################################
+
+jobs:
+
+  ##########################################################
+  # TERRAFORM PLAN JOB
+  ##########################################################
+
+  terraform-plan:
+
+    name: Terraform Plan
+
+    ########################################################
+    # RUNNER
+    ########################################################
+
+    runs-on: ubuntu-latest
+
+    ########################################################
+    # MATRIX STRATEGY
+    #
+    # Runs validation against ALL environments.
+    #
+    # Enterprise benefit:
+    # catches environment-specific issues early.
+    ########################################################
+
+    strategy:
+
+      fail-fast: false
+
+      matrix:
+        environment:
+          - dev
+          - staging
+          - prod
+
+    ########################################################
+    # DEFAULT WORKING DIRECTORY
+    ########################################################
+
+    defaults:
+      run:
+        working-directory: terraform/environments/${{ matrix.environment }}
+
+    steps:
+
+      ######################################################
+      # STEP 1 — CHECKOUT REPOSITORY
+      ######################################################
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      ######################################################
+      # STEP 2 — CONFIGURE AWS CREDENTIALS
+      #
+      # Uses GitHub OIDC federation.
+      #
+      # No static AWS access keys required.
+      ######################################################
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+
+        with:
+          role-to-assume: arn:aws:iam::123456789012:role/github-actions-role
+          aws-region: ${{ env.AWS_REGION }}
+
+      ######################################################
+      # STEP 3 — CREATE TERRAFORM PLUGIN CACHE DIRECTORY
+      ######################################################
+
+      - name: Create Plugin Cache Directory
+        run: mkdir -p ~/.terraform.d/plugin-cache
+
+      ######################################################
+      # STEP 4 — CACHE TERRAFORM PROVIDERS
+      #
+      # Major CI optimization.
+      ######################################################
+
+      - name: Cache Terraform Providers
+        uses: actions/cache@v4
+
+        with:
+          path: ~/.terraform.d/plugin-cache
+
+          key: >-
+            terraform-${{ runner.os }}-${{
+            hashFiles('**/.terraform.lock.hcl')
+            }}
+
+          restore-keys: |
+            terraform-${{ runner.os }}-
+
+      ######################################################
+      # STEP 5 — SETUP TERRAFORM
+      ######################################################
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      ######################################################
+      # STEP 6 — TERRAFORM FORMAT CHECK
+      #
+      # Ensures consistent formatting.
+      ######################################################
+
+      - name: Terraform Format Check
+        run: terraform fmt -check -recursive
+
+      ######################################################
+      # STEP 7 — TERRAFORM INIT
+      #
+      # Initializes backend + providers.
+      ######################################################
+
+      - name: Terraform Init
+        run: terraform init
+
+      ######################################################
+      # STEP 8 — TERRAFORM VALIDATE
+      #
+      # Validates syntax + internal consistency.
+      ######################################################
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      ######################################################
+      # STEP 9 — TFSEC SECURITY SCAN
+      #
+      # Scans Terraform for security issues.
+      ######################################################
+
+      - name: Run tfsec
+        uses: aquasecurity/tfsec-action@v1.0.3
+
+        with:
+          working_directory: terraform
+
+      ######################################################
+      # STEP 10 — CHECKOV SECURITY SCAN
+      #
+      # Additional IaC security scanning layer.
+      ######################################################
+
+      - name: Run Checkov
+        uses: bridgecrewio/checkov-action@master
+
+        with:
+          directory: terraform
+          framework: terraform
+
+      ######################################################
+      # STEP 11 — GENERATE TERRAFORM PLAN
+      #
+      # Creates execution plan artifact.
+      ######################################################
+
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
+
+      ######################################################
+      # STEP 12 — EXPORT PLAN TO TEXT
+      #
+      # Useful for PR visibility and debugging.
+      ######################################################
+
+      - name: Export Terraform Plan
+        run: terraform show -no-color tfplan > plan.txt
+
+      ######################################################
+      # STEP 13 — UPLOAD PLAN ARTIFACT
+      #
+      # Enterprise benefits:
+      # - auditing
+      # - debugging
+      # - artifact traceability
+      ######################################################
+
+      - name: Upload Terraform Plan Artifact
+        uses: actions/upload-artifact@v4
+
+        with:
+
+          name: terraform-plan-${{ matrix.environment }}
+
+          path: |
+            terraform/environments/${{ matrix.environment }}/tfplan
+            terraform/environments/${{ matrix.environment }}/plan.txt
+
+          retention-days: 30
+
+      ######################################################
+      # STEP 14 — COMMENT PLAN ON PR
+      #
+      # Gives reviewers visibility into infra changes.
+      ######################################################
+
+      - name: Comment Terraform Plan on PR
+
+        if: github.event_name == 'pull_request'
+
+        uses: actions/github-script@v7
+
+        with:
+          script: |
+
+            const fs = require('fs');
+
+            const plan = fs.readFileSync(
+              'terraform/environments/${{ matrix.environment }}/plan.txt',
+              'utf8'
+            );
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+
+              body:
+                '## Terraform Plan (${{
+                matrix.environment
+                }})\\n\\n```\\n' +
+                plan.slice(0, 65000) +
+                '\\n```'
+            });
+
+      ######################################################
+      # STEP 15 — PLAN SUMMARY
+      ######################################################
+
+      - name: Terraform Plan Summary
+        run: |
+          echo "Terraform plan completed successfully."
+          echo "Environment: ${{ matrix.environment }}"
