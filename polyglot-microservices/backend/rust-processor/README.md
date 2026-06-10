@@ -71,7 +71,7 @@ Built with Rust for maximum performance and memory safety:
 
 
 
-Rust Best Practices
+# Rust Best Practices
 Optimized dockerfile
 # cargo-chef for dependency caching
 FROM rust:1.75 AS chef
@@ -104,3 +104,4 @@ COPY --from=builder /app/target/release/rust-processor .
 USER nobody
 
 CMD ["./rust-processor"]
+
