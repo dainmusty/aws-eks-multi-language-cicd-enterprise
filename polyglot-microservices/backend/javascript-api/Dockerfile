@@ -2,7 +2,14 @@
 # STAGE 1 — DEPENDENCY INSTALLATION
 ############################################################
 
-FROM node:20-alpine AS builder
+FROM node:22-alpine AS builder
+
+############################################################
+# SECURITY UPDATES
+############################################################
+
+RUN apk update && apk upgrade && \
+    apk add --no-cache dumb-init
 
 ############################################################
 # WORKING DIRECTORY
@@ -12,18 +19,12 @@ WORKDIR /app
 
 ############################################################
 # COPY PACKAGE FILES FIRST
-#
-# Improves Docker layer caching.
 ############################################################
 
 COPY package*.json ./
 
 ############################################################
 # INSTALL DEPENDENCIES
-#
-# npm ci:
-# - deterministic installs
-# - faster CI/CD
 ############################################################
 
 RUN npm ci --omit=dev
@@ -38,7 +39,14 @@ COPY src ./src
 # STAGE 2 — PRODUCTION IMAGE
 ############################################################
 
-FROM node:20-alpine
+FROM node:22-alpine
+
+############################################################
+# SECURITY UPDATES
+############################################################
+
+RUN apk update && apk upgrade && \
+    apk add --no-cache dumb-init
 
 ############################################################
 # SET NODE ENVIRONMENT
@@ -61,7 +69,7 @@ COPY --from=builder /app/src ./src
 COPY --from=builder /app/package.json ./package.json
 
 ############################################################
-# SECURITY HARDENING
+# DROP ROOT PRIVILEGES
 ############################################################
 
 USER node
@@ -82,5 +90,7 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
 ############################################################
 # START APPLICATION
 ############################################################
+
+ENTRYPOINT ["dumb-init", "--"]
 
 CMD ["node", "src/index.js"]
