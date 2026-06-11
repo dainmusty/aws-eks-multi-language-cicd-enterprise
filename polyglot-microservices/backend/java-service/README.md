@@ -41,7 +41,7 @@ mvn test
 ### Docker Build
 
 ```bash
-docker build -t dainmusty/java-service:dev-latest2 .
+docker build -t dainmusty/java-service:staging-latest .
 docker push dainmusty/java-service:dev-latest
 docker run -p 8080:8080 java-service:1.0.0
 ```
