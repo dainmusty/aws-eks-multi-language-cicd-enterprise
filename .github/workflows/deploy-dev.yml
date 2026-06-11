@@ -51,7 +51,7 @@ jobs:
         run: |
           sed -i \
           "s/tag:.*/tag: \"dev-${GITHUB_SHA}\"/" \
-          helm/per-service-charts/react-dashboard/values.yaml          
+          helm/per-service-charts/frontend/values.yaml          
 
       #####################################################
       # Commit changes
