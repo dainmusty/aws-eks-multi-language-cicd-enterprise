@@ -30,6 +30,7 @@ image:
 
   # Updated dynamically by GitHub Actions deploy pipeline
   tag: "dev-9478e11107396d8a11f612f529801c0e1a30434c"
+  tag: "staging-525e3a3293df7d7156d6198c4e7122f295d0532f"
 
   pullPolicy: IfNotPresent
 
