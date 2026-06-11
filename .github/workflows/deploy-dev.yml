@@ -46,6 +46,13 @@ jobs:
           "s/tag:.*/tag: \"dev-${GITHUB_SHA}\"/" \
           helm/per-service-charts/rust-service/values.yaml
 
+
+      - name: Update React DEV Tag
+        run: |
+          sed -i \
+          "s/tag:.*/tag: \"dev-${GITHUB_SHA}\"/" \
+          helm/per-service-charts/react-dashboard/values.yaml          
+
       #####################################################
       # Commit changes
       #####################################################

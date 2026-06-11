@@ -52,19 +52,25 @@ jobs:
         run: |
           sed -i \
           "s/tag:.*/tag: \"prod-${GITHUB_SHA}\"/" \
-          helm/shared-platform-chart/microservice/values-javascript.yaml
+          helm/per-service-charts/javascript-api-service/values.yaml
 
       - name: Update Java PROD Tag
         run: |
           sed -i \
           "s/tag:.*/tag: \"prod-${GITHUB_SHA}\"/" \
-          helm/shared-platform-chart/microservice/values-java.yaml
+          helm/per-service-charts/java-service/values.yaml
 
       - name: Update Rust PROD Tag
         run: |
           sed -i \
           "s/tag:.*/tag: \"prod-${GITHUB_SHA}\"/" \
-          helm/shared-platform-chart/microservice/values-rust.yaml
+          helm/per-service-charts/rust-service/values.yaml
+
+      - name: Update React PROD Tag
+        run: |
+          sed -i \
+          "s/tag:.*/tag: \"prod-${GITHUB_SHA}\"/" \
+          helm/per-service-charts/frontend/values.yaml          
 
       #####################################################
       # Commit GitOps updates

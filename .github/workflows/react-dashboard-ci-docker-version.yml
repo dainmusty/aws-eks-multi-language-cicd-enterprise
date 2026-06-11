@@ -1,0 +1,233 @@
+############################################################
+# React Dashboard MICROSERVICE CI PIPELINE
+#
+# PURPOSE:
+# Enterprise CI pipeline for:
+# - Linting
+# - Unit Testing
+# - Dependency Scanning
+# - Docker Build
+# - Container Scanning
+# - ECR Push
+#
+# SERVICE:
+# services/react-dashboard
+#
+# TRIGGER:
+# Runs only when React Dashboard service changes.
+############################################################
+
+name: React Dashboard CI
+
+############################################################
+# TRIGGERS
+############################################################
+
+on:
+
+  push:
+
+    branches:
+      - dev
+      - staging
+      - main
+
+    paths:
+      - "polyglot-microservices/frontend/react-dashboard/**"
+
+  pull_request:
+
+    branches:
+      - main
+
+    paths:
+      - "polyglot-microservices/frontend/react-dashboard/**"
+
+############################################################
+# ENVIRONMENT VARIABLES
+############################################################
+
+env:
+  AWS_REGION: us-east-1
+  IMAGE_NAME: react-dashboard
+  DOCKER_REPOSITORY: dainmusty  # Docker Hub repository name
+  SERVICE_PATH: polyglot-microservices/frontend/react-dashboard
+  DOCKERFILE_PATH: polyglot-microservices/frontend/react-dashboard/Dockerfile
+
+############################################################
+# JOBS
+############################################################
+
+jobs:
+############################################################
+# DETERMINE SECURITY LEVEL
+############################################################
+
+  determine-scan-level:
+
+    runs-on: ubuntu-latest
+
+    outputs:
+
+      scan-level: ${{ steps.level.outputs.scan-level }}
+
+    steps:
+
+      - name: Determine Scan Level
+
+        id: level
+
+        run: |
+
+          if [[ "${GITHUB_REF}" == "refs/heads/main" ]]; then
+            echo "scan-level=full" >> $GITHUB_OUTPUT
+
+          elif [[ "${GITHUB_REF}" == "refs/heads/staging" ]]; then
+            echo "scan-level=comprehensive" >> $GITHUB_OUTPUT
+
+          else
+            echo "scan-level=fast" >> $GITHUB_OUTPUT
+          fi
+
+############################################################
+# SECURITY WORKFLOW
+############################################################
+
+  security:
+
+    needs: determine-scan-level
+
+    uses: ./.github/workflows/security-scanning.yml
+
+    with:
+
+      scan-level: ${{ needs.determine-scan-level.outputs.scan-level }}
+
+    secrets: inherit
+
+############################################################
+# BUILD / TEST / PACKAGE / PUSH
+############################################################
+  build-test-package-push:
+    needs: security
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+
+    ########################################################
+    # CHECKOUT SOURCE CODE
+    ########################################################
+
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    ########################################################
+    # REACT - TOOLCHAIN - SETUP NODE.JS
+    ########################################################
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+
+      with:
+        node-version: "20"
+
+        cache: npm
+
+        cache-dependency-path: |
+          polyglot-microservices/frontend/react-dashboard/package-lock.json
+
+    ########################################################
+    # INSTALL DEPENDENCIES
+    ########################################################
+
+    - name: Install Dependencies
+
+      working-directory: ${{ env.SERVICE_PATH }}
+
+      run: npm ci
+
+    ########################################################
+    # REACT - ESLINT
+    #
+    # Fails pipeline if linting issues exist.
+    ########################################################
+
+    - name: Run ESLint
+
+      working-directory: ${{ env.SERVICE_PATH }}
+
+      run: npm run lint
+
+    ########################################################
+    # REACT - UNIT TESTS
+    ########################################################
+
+    - name: Run Unit Tests
+
+      working-directory: ${{ env.SERVICE_PATH }}
+
+      run: npm test
+
+    
+    ########################################################
+    # REACT - BUILD STEP
+    #
+    # Not required.
+    # Service runs directly via Node.js.
+    ########################################################
+
+    - name: Skip Build Step
+      run: echo "No build stage required for React Dashboard service."
+
+    ########################################################
+    # DOCKER AUTHENTICATION, BUILD, SCAN, AND PUSH
+    ########################################################
+
+    - name: Login to Docker Hub
+      run: |
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+    - name: Build Docker Image
+      run: |
+        docker build \
+          -f ${{ env.DOCKERFILE_PATH }} \
+          -t ${{ env.DOCKER_REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+          -t ${{ env.DOCKER_REPOSITORY }}/${{ env.IMAGE_NAME }}:latest \
+          ${{ env.SERVICE_PATH }}
+
+
+    - name: Verify Docker Image Exists
+      run: |
+        docker images
+        docker image inspect ${{ env.DOCKER_REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+    - name: Scan Docker Image
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: '${{ env.DOCKER_REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}'
+        format: table
+        severity: HIGH,CRITICAL
+        exit-code: '0'
+        ignore-unfixed: true
+        scanners: vuln
+
+    - name: Push Docker Image
+      run: |
+          docker push ${{ env.DOCKER_REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          docker push ${{ env.DOCKER_REPOSITORY }}/${{ env.IMAGE_NAME }}:latest
+
+    ########################################################
+    # REACT - SAVE TEST REPORTS (OPTIONAL)
+    ########################################################
+
+    - name: Upload Artifacts
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: react-dashboard-ci-artifacts
+        path: |
+          polyglot-microservices/frontend/react-dashboard/package.json
+        retention-days: 7
