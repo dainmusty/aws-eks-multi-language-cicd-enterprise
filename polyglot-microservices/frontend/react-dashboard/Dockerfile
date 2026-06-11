@@ -1,11 +1,23 @@
-# Use official nginx base image
+# Stage 1: Build React app with Node
+FROM node:18-alpine AS build
+WORKDIR /app
+
+# Install dependencies
+COPY package*.json ./
+RUN npm install
+
+# Copy source code and build
+COPY . .
+RUN npm run build
+
+# Stage 2: Serve with nginx
 FROM nginx:alpine
 
 # Copy your custom nginx.conf (with pid + temp paths redirected to /tmp)
 COPY nginx.conf /etc/nginx/nginx.conf
 
-# Copy your application static files (React build output)
-COPY ./dist /usr/share/nginx/html
+# Copy built React app from build stage
+COPY --from=build /app/dist /usr/share/nginx/html
 
 # Ensure /tmp directories exist and are owned by nginx user
 RUN mkdir -p /tmp/client_temp /tmp/proxy_temp /tmp/fastcgi_temp /tmp/uwsgi_temp /tmp/scgi_temp \
