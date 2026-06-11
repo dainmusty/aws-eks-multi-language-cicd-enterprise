@@ -2,18 +2,20 @@
 FROM node:18-alpine AS build
 WORKDIR /app
 
-# Install dependencies
+# Copy package files and install ALL dependencies (including devDependencies)
 COPY package*.json ./
 RUN npm install
 
-# Copy source code and build
+# Copy the rest of the source code (including vite.config.js, etc.)
 COPY . .
+
+# Run the Vite build
 RUN npm run build
 
 # Stage 2: Serve with nginx
 FROM nginx:alpine
 
-# Copy your custom nginx.conf (with pid + temp paths redirected to /tmp)
+# Copy your custom nginx.conf
 COPY nginx.conf /etc/nginx/nginx.conf
 
 # Copy built React app from build stage
@@ -23,7 +25,7 @@ COPY --from=build /app/dist /usr/share/nginx/html
 RUN mkdir -p /tmp/client_temp /tmp/proxy_temp /tmp/fastcgi_temp /tmp/uwsgi_temp /tmp/scgi_temp \
     && chown -R nginx:nginx /tmp
 
-# Switch to non-root user (nginx is defined in the base image)
+# Switch to non-root user
 USER nginx
 
 # Expose port 80
