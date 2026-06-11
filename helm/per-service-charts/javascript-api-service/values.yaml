@@ -29,7 +29,7 @@ image:
   repository: dainmusty/javascript-api
 
   # Updated dynamically by GitHub Actions deploy pipeline
-  tag: "dev-21a6ee9c1f17e5f9aa13314a73bd54a1f5a09b23"
+  tag: "dev-6d711eff3fac6a22e43a4ef53a8bcdc6763cec9d"
 
   pullPolicy: IfNotPresent
 
