@@ -87,7 +87,7 @@ function App() {
         fontFamily: "Segoe UI, sans-serif",
       }}
     >
-      <h1>Polyglot Enterprise Platform</h1>
+      <h1>Polyglot Enterprise Platform - Development</h1>
 
       <p>React + Node.js + Java + Rust</p>
 
