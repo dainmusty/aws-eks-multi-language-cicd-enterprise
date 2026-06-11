@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: https://github.com/dainmusty/aws-eks-multi-language-cicd-enterprise.git
     targetRevision: staging
-    path: helm/per-service-charts/microservice
+    path: helm/per-service-charts/javascript-api-service
     helm:
       valueFiles:
         - values.yaml

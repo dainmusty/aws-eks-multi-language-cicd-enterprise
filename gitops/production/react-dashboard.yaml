@@ -1,21 +1,21 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: java-service-staging
+  name: react-dashboard-prod
   namespace: argocd
 spec:
   project: default
   source:
     repoURL: https://github.com/dainmusty/aws-eks-multi-language-cicd-enterprise.git
-    targetRevision: staging
-    path: helm/per-servie-charts/java-service
+    targetRevision: main
+    path: helm/per-service-charts/frontend
     helm:
       valueFiles:
         - values.yaml
-        - values-staging.yaml
+        - values-production.yaml
   destination:
     server: https://kubernetes.default.svc
-    namespace: polyglot-staging
+    namespace: polyglot-prod
   syncPolicy:
     automated:
       prune: true
