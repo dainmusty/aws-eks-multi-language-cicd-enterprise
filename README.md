@@ -1,495 +1,273 @@
-# 🚀 Enterprise Polyglot Microservices Platform on AWS EKS
+# 🚀 AWS EKS Multi-Language GitOps CI/CD Enterprise Platform
 
-![Terraform](https://img.shields.io/badge/Terraform-IaC-623CE4?style=for-the-badge&logo=terraform)
-![AWS](https://img.shields.io/badge/AWS-Cloud-FF9900?style=for-the-badge&logo=amazonaws)
-![Kubernetes](https://img.shields.io/badge/Kubernetes-EKS-326CE5?style=for-the-badge&logo=kubernetes)
-![Helm](https://img.shields.io/badge/Helm-Packaging-0F1689?style=for-the-badge&logo=helm)
-![ArgoCD](https://img.shields.io/badge/ArgoCD-GitOps-EF7B4D?style=for-the-badge)
-![GitHub Actions](https://img.shields.io/badge/GitHub-Actions-2088FF?style=for-the-badge&logo=githubactions)
-![Prometheus](https://img.shields.io/badge/Prometheus-Monitoring-E6522C?style=for-the-badge&logo=prometheus)
-![Grafana](https://img.shields.io/badge/Grafana-Observability-F46800?style=for-the-badge&logo=grafana)
+Production-style cloud-native platform demonstrating Enterprise DevOps, GitOps, Kubernetes, Infrastructure as Code, Security Automation, and Polyglot Microservices deployment on AWS EKS.
 
 ---
 
-# 🌟 Project Summary
+## Table of Contents
 
-This project demonstrates how to build and operate a **production-grade Platform Engineering ecosystem** using:
-
-- AWS EKS
-- Terraform
-- Helm
-- ArgoCD GitOps
-- GitHub Actions
-- Prometheus & Grafana
-- Multi-Language Microservices
-- Enterprise Security Controls
-
-The platform deploys and manages:
-
-| Service | Language | Framework |
-|----------|-----------|------------|
-| JavaScript API | Node.js | Express |
-| Java Service | Java | Spring Boot |
-| Rust Processor | Rust | Actix Web |
+* Overview
+* Architecture
+* Technology Stack
+* Project Structure
+* Screenshots
+* CI/CD Architecture
+* Deployment Strategies
+* Security Strategy
+* GitOps Deployment Model
+* Environment Promotion Flow
+* Rollback Strategy
+* Monitoring & Observability
+* Key Features
+* Learning Outcomes
+* Future Enhancements
 
 ---
 
-# 🏗 Enterprise Architecture
+# Overview
+
+This project demonstrates an enterprise-grade GitOps platform supporting multiple application languages deployed to Kubernetes using AWS EKS.
+
+The platform implements:
+
+* Infrastructure as Code with Terraform
+* GitOps with ArgoCD
+* Kubernetes deployments using Helm
+* Environment promotion pipelines
+* Automated security scanning
+* Docker image lifecycle management
+* Multi-language CI/CD workflows
+* Enterprise deployment patterns
+
+The project includes:
+
+* React Dashboard
+* JavaScript API (Node.js)
+* Java Spring Boot Service
+* Rust Processor Service
+
+---
+
+# Architecture
+
+![Architecture Diagram](docs/images/architecture-diagram.png)
 
 ```text
-                   ┌────────────────────┐
-                   │    Developers      │
-                   └─────────┬──────────┘
-                             │
-                             ▼
-                  ┌─────────────────────┐
-                  │      GitHub         │
-                  └─────────┬───────────┘
-                            │
-                            ▼
-              ┌────────────────────────────┐
-              │     GitHub Actions CI      │
-              └──────────┬─────────────────┘
-                         │
-         ┌───────────────┼──────────────────┐
-         │               │                  │
-         ▼               ▼                  ▼
-
-   JavaScript CI     Java CI          Rust CI
-
-         │               │                  │
-         └───────────────┼──────────────────┘
-                         │
-                         ▼
-
-              Security Scanning Layer
-
-                         │
-                         ▼
-
-                    Amazon ECR
-
-                         │
-                         ▼
-
-                GitOps Configuration
-
-                         │
-                         ▼
-
-                      ArgoCD
-
-                         │
-                         ▼
-
-                    Amazon EKS
-
-                         │
-      ┌──────────────────┼──────────────────┐
-      ▼                  ▼                  ▼
-
- JavaScript API     Java Service     Rust Processor
+Developer
+    │
+    ▼
+GitHub
+    │
+    ▼
+GitHub Actions
+    │
+    ├── Security Scans
+    ├── Unit Tests
+    ├── Docker Build
+    └── Image Push
+    │
+    ▼
+GitOps Repository Update
+    │
+    ▼
+ArgoCD
+    │
+    ▼
+AWS EKS Cluster
+    │
+    ├── React Dashboard
+    ├── JavaScript API
+    ├── Java Service
+    └── Rust Processor
 ```
 
 ---
 
-# 🎯 Architecture Highlights
+# Technology Stack
 
-### Infrastructure as Code
-
-- Terraform Modules
-- Remote State Management
-- Environment Isolation
-- Reusable Infrastructure Components
-
-### Kubernetes Platform Engineering
-
-- Amazon EKS
-- AWS Load Balancer Controller
-- Horizontal Pod Autoscaling
-- Network Policies
-- Service Accounts
-- Pod Disruption Budgets
-
-### GitOps
-
-- ArgoCD App-of-Apps
-- Environment Promotion
-- Self-Healing Clusters
-- Drift Detection
-
-### CI/CD
-
-- Language-Specific Pipelines
-- Matrix Builds
-- Docker Image Optimization
-- Security Gates
-
-### Observability
-
-- Prometheus
-- Grafana
-- AlertManager
+| Category      | Technology                        |
+| ------------- | --------------------------------- |
+| Cloud         | AWS                               |
+| Containers    | Docker                            |
+| Orchestration | Kubernetes (EKS)                  |
+| GitOps        | ArgoCD                            |
+| IaC           | Terraform                         |
+| Packaging     | Helm                              |
+| CI/CD         | GitHub Actions                    |
+| Frontend      | React                             |
+| Backend       | Node.js                           |
+| Backend       | Java Spring Boot                  |
+| Backend       | Rust                              |
+| Security      | Trivy, Gitleaks, Semgrep, Checkov |
+| Monitoring    | Prometheus, Grafana               |
 
 ---
 
-# 📂 Repository Structure
+# Project Structure
 
 ```text
-polyglot-microservices/
-
+.
 ├── terraform/
-│
-├── services/
+├── helm/
+│   ├── react-dashboard/
 │   ├── javascript-api/
 │   ├── java-service/
 │   └── rust-processor/
 │
-├── helm/
-│   ├── per-service-charts/
-│   └── shared-platform-chart/
+├── polyglot-microservices/
+│   ├── frontend/
+│   └── backend/
 │
-├── gitops/
-│   ├── dev/
-│   ├── staging/
-│   └── production/
-│
-├── argocd/
-│   ├── root-app.yaml
-│   └── projects/
+├── k8s/
+│   ├── bootstrap/
+│   └── apps/
 │
 └── .github/workflows/
 ```
 
 ---
 
-# 🚀 CI/CD Workflow
+# Screenshots
 
-```text
-Developer Push
-       │
-       ▼
-GitHub Actions
-       │
-       ▼
-Unit Tests
-       │
-       ▼
-Security Scans
-       │
-       ▼
-Docker Build
-       │
-       ▼
-Push to Amazon ECR
-       │
-       ▼
-Update Helm Values
-       │
-       ▼
-GitOps Commit
-       │
-       ▼
-ArgoCD Sync
-       │
-       ▼
-Deploy to Kubernetes
-```
+### Operations Portal
 
----
+The React Operations Portal provides a centralized view of platform health across all microservices.
 
-# 🔐 Enterprise Security Strategy
+![Operations Portal](docs/screenshots/dashboard-healthy.png)
 
-## Development
+## GitHub Actions Pipelines
 
-Fast Feedback
+Independent CI/CD pipelines for React, Node.js, Java, and Rust services.
 
-- Gitleaks
-- Critical Dependency Checks
-- Linting
+![GitHub Actions Workflows](docs/screenshots/javascript-workflow.png)
 
-Runtime:
+![GitHub Actions Workflows](docs/screenshots/java-service-workflow.png)
 
-< 2 minutes
+![GitHub Actions Workflows](docs/screenshots/react-dashboard-workflow.png)
+
+![GitHub Actions Workflows](docs/screenshots/rust-workflow.png)
+
+![GitHub Actions Workflows](docs/screenshots/reusable-security-scanning-for-js-jv-rest-react.png)
+
+![GitHub Actions Workflows](docs/screenshots/react-js-rust-java-tool-chain.png)
+
+![GitHub Actions Workflows](docs/screenshots/docker-build-push.png)
+
+## ArgoCD Applications
+
+![ArgoCD Applications](docs/screenshots/argocd-applications.png)
+
+### Development Environment
+
+All services successfully deployed and healthy in the development environment.
+
+![Development Environment](docs/screenshots/dev-environment.png)
+
+### Staging Environment
+
+Environment promotion from Development to Staging using GitOps workflows.
+
+![Staging Environment](images/staging-environment.png)
 
 ---
 
-## Staging
+# CI/CD Architecture
 
-Comprehensive Security Validation
-
-- Semgrep
-- OWASP Dependency Check
-- Cargo Audit
-- tfsec
-- Checkov
-
-Runtime:
-
-5-7 minutes
-
----
-
-## Production
-
-Maximum Security
-
-- Container Scanning
-- DAST
-- Compliance Validation
-- Security Reports
-
-Runtime:
-
-10-15 minutes
-
----
-
-# 🌎 Environment Promotion Model
-
-```text
-Feature Branch
-      │
-      ▼
-Develop
-      │
-      ▼
-DEV Environment
-      │
-      ▼
-Staging Branch
-      │
-      ▼
-STAGING Environment
-      │
-      ▼
-Main Branch
-      │
-      ▼
-PRODUCTION Environment
-```
-
----
-
-## Approval Gates
-
-| Environment | Approval |
-|------------|------------|
-| DEV | Automatic |
-| STAGING | 1 Reviewer |
-| PRODUCTION | 2 Reviewers + Security Approval |
-
----
-
-# 🔄 Rollback Strategy
-
-## Git Revert (Preferred)
-
-```bash
-git revert HEAD
-git push
-```
-
-ArgoCD automatically restores the previous release.
-
----
-
-## ArgoCD Rollback
-
-```bash
-argocd app rollback
-```
-
----
-
-## Helm Rollback
-
-```bash
-helm rollback
-```
-
-Emergency use only.
-
----
-
-# 📊 Monitoring & Alerting
-
-### Metrics
-
-- Cluster Health
-- Node Health
-- Pod Health
-- Application Metrics
-- Container Metrics
-
-### Alerts
-
-- High CPU Usage
-- High Memory Usage
-- Pod Crash Loops
-- Node Down
-- Service Unavailable
-
-### Dashboards
-
-- EKS Cluster Dashboard
-- Node Exporter Dashboard
-- Application Dashboard
-- Infrastructure Dashboard
-
----
-
-# 🧠 Key Engineering Concepts Demonstrated
-
-✅ Infrastructure as Code
-
-✅ Platform Engineering
-
-✅ GitOps
-
-✅ Kubernetes Operations
-
-✅ Cloud Security
-
-✅ Production CI/CD
-
-✅ Multi-Language Architectures
-
-✅ Release Engineering
-
-✅ Disaster Recovery
-
-✅ Observability
-
----
-
-# 📸 Screenshots
-
-> Add these after deployment
-
-### EKS Cluster
-
-![eks](docs/screenshots/eks-cluster.png)
-
-### ArgoCD Applications
-
-![argocd](docs/screenshots/argocd-applications.png)
-
-### GitHub Actions
-
-![gha](docs/screenshots/github-actions.png)
-
-### Grafana Dashboards
-
-![grafana](docs/screenshots/grafana-dashboard.png)
-
-# CI/CD Pipeline Strategy
-
-This project demonstrates **two enterprise-grade CI/CD approaches** commonly used in modern platform engineering teams.
-
----
-
-## Option A: Service-Specific CI Pipelines (Primary Approach)
-
-Each microservice owns its own CI pipeline.
+The platform implements service-specific CI pipelines.
 
 ```text
 .github/workflows/
+
 ├── javascript-ci.yml
 ├── java-ci.yml
 ├── rust-ci.yml
+├── react-ci.yml
+├── deploy-dev.yml
+├── deploy-staging.yml
+├── deploy-production.yml
+├── promote-release.yml
+├── rollback.yml
+└── release-summary.yml
 ```
 
-### Workflow
+Each service is independently built, tested, scanned, containerized, and deployed.
+
+---
+
+# Deployment Strategies
+
+## Option A: Service-Specific CI Pipelines (Implemented)
 
 ```text
 Developer Push
-        │
-        ▼
-Language-Specific CI
-        │
-        ├── Lint
-        ├── Unit Tests
-        ├── Build
-        ├── Security Scans
-        ├── Docker Build
-        └── Push to ECR
+       │
+       ▼
+Language-Specific Pipeline
+       │
+       ├── Lint
+       ├── Tests
+       ├── Security Scan
+       ├── Docker Build
+       └── Docker Push
 ```
 
 ### Advantages
 
 * Easier troubleshooting
 * Clear ownership boundaries
-* Language-specific optimization
-* Faster onboarding for new engineers
-* Easier interview demonstrations
-* Mirrors how many enterprises operate polyglot platforms
+* Faster onboarding
+* Language-specific optimizations
+* Better educational value
+* Common enterprise pattern
 
 ### Disadvantages
 
 * More workflow files
 * Some duplicated logic
-* Additional maintenance as service count grows
+* Additional maintenance
 
 ### Best Use Cases
 
-* Small and medium engineering teams
-* Polyglot microservice environments
-* Organizations with fewer than 20 services
-* Educational and portfolio projects
+* Small and medium teams
+* Polyglot environments
+* Portfolio projects
+* Microservice platforms
 
 ---
 
-## Option B: Multi-Language Matrix Pipeline (Advanced Approach)
-
-A single workflow dynamically builds only changed services.
-
-```text
-.github/workflows/
-└── multi-language-ci.yml
-```
-
-### Workflow
+## Option B: Multi-Language Matrix Pipeline (Reference Architecture)
 
 ```text
 Developer Push
-        │
-        ▼
+       │
+       ▼
 Detect Changed Services
-        │
-        ├── JavaScript Changed?
-        ├── Java Changed?
-        └── Rust Changed?
-                 │
-                 ▼
-         Parallel Matrix Build
-                 │
-                 ├── Docker Build
-                 ├── Security Scan
-                 └── Push to ECR
+       │
+       ▼
+Parallel Matrix Builds
+       │
+       ├── Build
+       ├── Scan
+       └── Push
 ```
 
 ### Advantages
 
 * Centralized governance
-* Less duplicated workflow code
-* Scales efficiently to many services
-* Preferred by large platform engineering teams
-* Demonstrates advanced GitHub Actions skills
+* Less duplicated code
+* Better scaling
 
 ### Disadvantages
 
-* More complex workflow logic
+* Complex workflow logic
 * Harder troubleshooting
 * More difficult onboarding
-* Language-specific customization becomes harder
 
 ### Best Use Cases
 
 * Large organizations
-* Internal developer platforms
 * Platform engineering teams
-* Organizations managing dozens of microservices
+* Internal developer platforms
 
 ---
 
@@ -498,113 +276,98 @@ Detect Changed Services
 This project uses:
 
 ```text
-Primary CI Strategy:
+Primary:
     Service-Specific Pipelines
 
-Advanced Reference:
-    Multi-Language Matrix Pipeline
+Reference:
+    Matrix-Based Pipeline
 ```
 
-The service-specific approach is used as the primary implementation because it provides:
-
-* Better maintainability
-* Easier debugging
-* Clear service ownership
-* Better educational value
-
-The matrix pipeline remains in the repository as an advanced platform-engineering reference implementation.
+The service-specific model was selected because it offers the best balance between maintainability, clarity, scalability, and interview value.
 
 ---
 
 # Security Strategy
 
-This project implements environment-aware security scanning to balance developer productivity with enterprise security requirements.
+Environment-aware security scanning is implemented.
 
 ---
 
-## Development Environment
+## Development
 
 ```text
 Branch:
-    develop
+    dev
 
-Security Controls:
+Security:
     - Gitleaks
-    - Critical Dependency Scanning
-    - Linting
+    - Basic Dependency Scanning
 
 Goal:
-    Fast developer feedback
+    Fast Feedback
 ```
 
 ---
 
-## Staging Environment
+## Staging
 
 ```text
 Branch:
     staging
 
-Security Controls:
-    - Semgrep SAST
+Security:
+    - Semgrep
     - OWASP Dependency Check
     - Cargo Audit
     - Checkov
     - Helm Lint
 
 Goal:
-    Catch security issues before production
+    Pre-Production Validation
 ```
 
 ---
 
-## Production Environment
+## Production
 
 ```text
 Branch:
     main
 
-Security Controls:
-    - Full Security Suite
-    - Trivy Repository Scan
+Security:
+    - Full Trivy Scan
     - SBOM Generation
     - Compliance Validation
-    - Manual Approval Gates
+    - Manual Approvals
 
 Goal:
-    Maximum security and compliance
+    Maximum Security
 ```
 
 ---
 
 # GitOps Deployment Model
 
-This project follows a GitOps deployment model using ArgoCD.
-
----
-
-## Deployment Flow
-
 ```text
 Developer Push
         │
         ▼
-GitHub Actions CI
+GitHub Actions
         │
         ▼
 Build Container Images
         │
         ▼
-Push Images to ECR
+Push Images
         │
         ▼
-Update GitOps Manifests
+Update Helm Values
         │
         ▼
-Commit Back to Git
+Commit GitOps Changes
         │
         ▼
-ArgoCD Detects Change
+ArgoCD Sync
         │
         ▼
 Kubernetes Deployment
@@ -612,53 +375,39 @@ Kubernetes Deployment
 
 ---
 
-## Environment Promotion Flow
+# Environment Promotion Flow
 
 ```text
 Feature Branch
       │
       ▼
-Develop
+DEV
       │
       ▼
-DEV Deployment
+STAGING
       │
       ▼
-Staging
-      │
-      ▼
-STAGING Deployment
-      │
-      ▼
-Production Approval
-      │
-      ▼
-MAIN
-      │
-      ▼
-PRODUCTION Deployment
+PRODUCTION
 ```
+
+Each environment uses independent Helm values and deployment workflows.
 
 ---
 
-## Rollback Strategy
+# Rollback Strategy
 
-### Option 1 (Recommended)
-
-Git Revert
+## Git Revert (Recommended)
 
 ```bash
 git revert <commit-id>
 git push
 ```
 
-ArgoCD automatically rolls back the deployment.
+ArgoCD automatically reconciles cluster state.
 
 ---
 
-### Option 2
-
-ArgoCD Rollback
+## ArgoCD Rollback
 
 ```bash
 argocd app rollback <application>
@@ -666,43 +415,67 @@ argocd app rollback <application>
 
 ---
 
-### Option 3
-
-Helm Rollback
+## Helm Rollback
 
 ```bash
 helm rollback <release> <revision>
 ```
 
-Used primarily for emergency recovery scenarios.
+---
+
+# Monitoring & Observability
+
+* Prometheus
+* Grafana
+* Kubernetes Metrics
+* Node Exporter
+* Application Health Checks
 
 ---
 
-# Enterprise Enhancements (Future Roadmap)
+# Key Features
 
-The platform is intentionally designed to support future enterprise-grade enhancements.
+* AWS EKS Kubernetes Platform
+* GitOps with ArgoCD
+* Terraform Infrastructure as Code
+* Helm Deployments
+* Multi-Language Microservices
+* Environment Promotion Pipelines
+* Automated Security Scanning
+* Docker Image Lifecycle Management
+* Enterprise Deployment Workflows
+* Rollback Automation
 
-Potential future improvements include:
-
-* OIDC Authentication for GitHub Actions
-* Cross-Account ECR Promotion
-* Argo Rollouts (Blue/Green Deployments)
-* Canary Releases
-* Progressive Delivery
-* Cosign Image Signing
-* SBOM Attestation
-* Open Policy Agent (OPA)
-* Kyverno Policy Enforcement
-* Multi-Region EKS Deployments
-* Disaster Recovery Automation
-* ArgoCD Notifications
-* Automated Compliance Reporting
-
-These enhancements represent common evolution paths for mature enterprise Kubernetes platforms.
 ---
 
-# 👨‍💻 Author
+# Learning Outcomes
 
-Platform Engineering | DevOps | Cloud Infrastructure
+This project demonstrates practical experience with:
 
-Built to demonstrate enterprise-grade Kubernetes, GitOps, security automation, observability, and cloud-native deployment practices.
+* Kubernetes Administration
+* AWS EKS Operations
+* Terraform
+* GitHub Actions
+* GitOps
+* ArgoCD
+* Helm
+* Platform Engineering
+* Security Automation
+* Enterprise CI/CD Design
+
+---
+
+# Future Enhancements
+
+* AWS Load Balancer Controller
+* ExternalDNS
+* Cert Manager
+* Service Mesh (Istio)
+* OpenTelemetry
+* Multi-Region Deployments
+* Policy-as-Code (OPA/Gatekeeper)
+* Vault Integration
+* Progressive Delivery with Argo Rollouts
+
+```
+```

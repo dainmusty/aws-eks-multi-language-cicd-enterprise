@@ -1,32 +1,8 @@
-############################################################
-# React Dashboard MICROSERVICE CI PIPELINE
-#
-# PURPOSE:
-# Enterprise CI pipeline for:
-# - Linting
-# - Unit Testing
-# - Dependency Scanning
-# - Docker Build
-# - Container Scanning
-# - ECR Push
-#
-# SERVICE:
-# services/react-dashboard
-#
-# TRIGGER:
-# Runs only when React Dashboard service changes.
-############################################################
-
 name: React Dashboard CI
-
-############################################################
-# TRIGGERS
-############################################################
 
 on:
 
   push:
-
     branches:
       - dev
       - staging
@@ -36,16 +12,11 @@ on:
       - "polyglot-microservices/frontend/react-dashboard/**"
 
   pull_request:
-
     branches:
       - main
 
     paths:
       - "polyglot-microservices/frontend/react-dashboard/**"
-
-############################################################
-# ENVIRONMENT VARIABLES
-############################################################
 
 env:
   AWS_REGION: us-east-1
@@ -53,6 +24,7 @@ env:
   DOCKER_REPOSITORY: dainmusty  # Docker Hub repository name
   SERVICE_PATH: polyglot-microservices/frontend/react-dashboard
   DOCKERFILE_PATH: polyglot-microservices/frontend/react-dashboard/Dockerfile
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 ############################################################
 # JOBS
@@ -124,10 +96,8 @@ jobs:
     - name: Checkout Repository
       uses: actions/checkout@v4
 
-    ########################################################
     # REACT - TOOLCHAIN - SETUP NODE.JS
-    ########################################################
-
+    
     - name: Setup Node.js
       uses: actions/setup-node@v4
 
@@ -139,31 +109,17 @@ jobs:
         cache-dependency-path: |
           polyglot-microservices/frontend/react-dashboard/package-lock.json
 
-    ########################################################
-    # INSTALL DEPENDENCIES
-    ########################################################
-
     - name: Install Dependencies
 
       working-directory: ${{ env.SERVICE_PATH }}
 
       run: npm ci
 
-    ########################################################
-    # REACT - ESLINT
-    #
-    # Fails pipeline if linting issues exist.
-    ########################################################
-
-    - name: Run ESLint
+    - name: Run ESLint    # Fails pipeline if linting issues exist.
 
       working-directory: ${{ env.SERVICE_PATH }}
 
       run: npm run lint
-
-    ########################################################
-    # REACT - UNIT TESTS
-    ########################################################
 
     - name: Run Unit Tests
 
@@ -171,21 +127,12 @@ jobs:
 
       run: npm test
 
-    
-    ########################################################
-    # REACT - BUILD STEP
-    #
-    # Not required.
-    # Service runs directly via Node.js.
-    ########################################################
-
     - name: Skip Build Step
       run: echo "No build stage required for React Dashboard service."
 
     ########################################################
     # DOCKER AUTHENTICATION, BUILD, SCAN, AND PUSH
     ########################################################
-
     - name: Login to Docker Hub
       run: |
           echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
@@ -197,7 +144,6 @@ jobs:
           -t ${{ env.DOCKER_REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
           -t ${{ env.DOCKER_REPOSITORY }}/${{ env.IMAGE_NAME }}:latest \
           ${{ env.SERVICE_PATH }}
-
 
     - name: Verify Docker Image Exists
       run: |

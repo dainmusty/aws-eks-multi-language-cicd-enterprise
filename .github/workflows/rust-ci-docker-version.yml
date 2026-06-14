@@ -13,7 +13,7 @@
 # .github/workflows/security-scanning.yml
 #
 # ENTERPRISE DESIGN:
-# - Cargo caching
+# - Cargo caching, clippy linting, release build, unit tests and format check
 # - Branch-aware security
 # - OIDC authentication
 # - Immutable image tags
@@ -55,6 +55,7 @@ env:
   DOCKER_REPOSITORY: dainmusty  # Docker Hub repository name
   SERVICE_PATH: polyglot-microservices/backend/rust-processor
   DOCKERFILE_PATH: polyglot-microservices/backend/rust-processor/Dockerfile
+  
 
 ############################################################
 # JOBS

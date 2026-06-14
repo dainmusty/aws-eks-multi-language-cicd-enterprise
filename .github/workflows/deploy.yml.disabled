@@ -105,6 +105,8 @@ jobs:
 
       rust: ${{ steps.filter.outputs.rust }}
 
+      rust: ${{ steps.filter.outputs.react }}
+
     steps:
 
       - name: Checkout Repository
@@ -122,13 +124,16 @@ jobs:
           filters: |
 
             javascript:
-              - 'services/javascript-api/**'
+              - 'polyglot-microservices/backend/javascript-api/**'
 
             java:
-              - 'services/java-service/**'
+              - 'polyglot-microservices/backend/java-service/**'
 
             rust:
-              - 'services/rust-processor/**'
+              - 'polyglot-microservices/backend/rust-processor/**'
+
+            react:
+              - 'polyglot-microservices/frontend/react-dashboard/**'  
 
 ############################################################
 # JOB 3
@@ -171,7 +176,7 @@ jobs:
 
           sed -i \
           "s/tag:.*/tag: \"${GITHUB_SHA}\"/" \
-          helm/shared-platform-chart/microservice/values-javascript.yaml
+          helm/per-service-charts/javascript-api-service/values.yaml
 
 ##########################################################
 # JAVA
@@ -185,7 +190,7 @@ jobs:
 
           sed -i \
           "s/tag:.*/tag: \"${GITHUB_SHA}\"/" \
-          helm/shared-platform-chart/microservice/values-java.yaml
+          helm/per-service-charts/java-service/values.yaml
 
 ##########################################################
 # RUST
@@ -199,7 +204,23 @@ jobs:
 
           sed -i \
           "s/tag:.*/tag: \"${GITHUB_SHA}\"/" \
-          helm/shared-platform-chart/microservice/values-rust.yaml
+          helm/per-service-charts/rust-service/values.yaml
+
+
+##########################################################
+# REACT
+##########################################################
+
+      - name: Update Reat-Dashboard Image Tag
+
+        if: needs.detect-changes.outputs.react == 'true'
+
+        run: |
+
+          sed -i \
+          "s/tag:.*/tag: \"${GITHUB_SHA}\"/" \
+          helm/per-service-charts/frontend/values.yaml
+
 
 ##########################################################
 # COMMIT CHANGES
@@ -274,6 +295,11 @@ jobs:
 
           echo "Rust Changed:"
           echo "${{ needs.detect-changes.outputs.rust }}"
+
+          echo ""
+
+          echo "React Changed:"
+          echo "${{ needs.detect-changes.outputs.react }}"
 
           echo ""
 
