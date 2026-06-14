@@ -29,11 +29,11 @@ image:
   repository: dainmusty/react-dashboard
 
   # Updated dynamically by GitHub Actions deploy pipeline
-  tag: "dev-b48fb2072d7d19d2b19adbecedd3e7e743ecb0df"
-  tag: "dev-b48fb2072d7d19d2b19adbecedd3e7e743ecb0df"
-  tag: "staging-f7457920115a762e07bf1e7f0e8e49cfb55a0e1c"
-  tag: "staging-f7457920115a762e07bf1e7f0e8e49cfb55a0e1c"
-  tag: "staging-f7457920115a762e07bf1e7f0e8e49cfb55a0e1c"
+  tag: "dev-b2cd9cc758da4fc0f9329534b33b47aa982e97a9"
+  tag: "dev-b2cd9cc758da4fc0f9329534b33b47aa982e97a9"
+  tag: "dev-b2cd9cc758da4fc0f9329534b33b47aa982e97a9"
+  tag: "dev-b2cd9cc758da4fc0f9329534b33b47aa982e97a9"
+  tag: "dev-b2cd9cc758da4fc0f9329534b33b47aa982e97a9"
 
   pullPolicy: IfNotPresent
 
