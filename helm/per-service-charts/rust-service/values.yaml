@@ -29,16 +29,16 @@ image:
   repository: dainmusty/rust-processor
 
   # Updated dynamically by GitHub Actions deploy pipeline
-  tag: "dev-b2cd9cc758da4fc0f9329534b33b47aa982e97a9"
-  tag: "dev-b2cd9cc758da4fc0f9329534b33b47aa982e97a9"
-  tag: "dev-b2cd9cc758da4fc0f9329534b33b47aa982e97a9"
-  tag: "dev-b2cd9cc758da4fc0f9329534b33b47aa982e97a9"
-  tag: "dev-b2cd9cc758da4fc0f9329534b33b47aa982e97a9"
-  tag: "dev-b2cd9cc758da4fc0f9329534b33b47aa982e97a9"
-  tag: "dev-b2cd9cc758da4fc0f9329534b33b47aa982e97a9"
-  tag: "dev-b2cd9cc758da4fc0f9329534b33b47aa982e97a9"
-  tag: "dev-b2cd9cc758da4fc0f9329534b33b47aa982e97a9"
-  tag: "dev-b2cd9cc758da4fc0f9329534b33b47aa982e97a9"
+  tag: "staging-5ca458bf11ab2c6bbbb348398914189a05c10d49"
+  tag: "staging-5ca458bf11ab2c6bbbb348398914189a05c10d49"
+  tag: "staging-5ca458bf11ab2c6bbbb348398914189a05c10d49"
+  tag: "staging-5ca458bf11ab2c6bbbb348398914189a05c10d49"
+  tag: "staging-5ca458bf11ab2c6bbbb348398914189a05c10d49"
+  tag: "staging-5ca458bf11ab2c6bbbb348398914189a05c10d49"
+  tag: "staging-5ca458bf11ab2c6bbbb348398914189a05c10d49"
+  tag: "staging-5ca458bf11ab2c6bbbb348398914189a05c10d49"
+  tag: "staging-5ca458bf11ab2c6bbbb348398914189a05c10d49"
+  tag: "staging-5ca458bf11ab2c6bbbb348398914189a05c10d49"
 
   pullPolicy: IfNotPresent
 
