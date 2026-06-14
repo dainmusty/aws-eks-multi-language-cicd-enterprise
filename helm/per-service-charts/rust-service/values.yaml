@@ -33,6 +33,8 @@ image:
   tag: "staging-b9336083b55d846cc2092f6dde70d14600dfd233"
   tag: "staging-b9336083b55d846cc2092f6dde70d14600dfd233"
   tag: "staging-b9336083b55d846cc2092f6dde70d14600dfd233"
+  tag: "prod-6be6cc4f40cbb771cbd98ecdd442a1030327b898"
+  tag: "prod-6be6cc4f40cbb771cbd98ecdd442a1030327b898"
 
   pullPolicy: IfNotPresent
 
