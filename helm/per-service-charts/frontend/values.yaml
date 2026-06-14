@@ -29,19 +29,19 @@ image:
   repository: dainmusty/react-dashboard
 
   # Updated dynamically by GitHub Actions deploy pipeline
-  tag: "dev-220598a16c60c893eaf8e17c45f39714facf83d5"
-  tag: "dev-220598a16c60c893eaf8e17c45f39714facf83d5"
-  tag: "dev-220598a16c60c893eaf8e17c45f39714facf83d5"
-  tag: "dev-220598a16c60c893eaf8e17c45f39714facf83d5"
-  tag: "dev-220598a16c60c893eaf8e17c45f39714facf83d5"
-  tag: "dev-220598a16c60c893eaf8e17c45f39714facf83d5"
-  tag: "dev-220598a16c60c893eaf8e17c45f39714facf83d5"
-  tag: "dev-220598a16c60c893eaf8e17c45f39714facf83d5"
-  tag: "dev-220598a16c60c893eaf8e17c45f39714facf83d5"
-  tag: "dev-220598a16c60c893eaf8e17c45f39714facf83d5"
-  tag: "dev-220598a16c60c893eaf8e17c45f39714facf83d5"
-  tag: "dev-220598a16c60c893eaf8e17c45f39714facf83d5"
-  tag: "dev-220598a16c60c893eaf8e17c45f39714facf83d5"
+  tag: "staging-366791deca68330659ff6bbdcd0a928035384c55"
+  tag: "staging-366791deca68330659ff6bbdcd0a928035384c55"
+  tag: "staging-366791deca68330659ff6bbdcd0a928035384c55"
+  tag: "staging-366791deca68330659ff6bbdcd0a928035384c55"
+  tag: "staging-366791deca68330659ff6bbdcd0a928035384c55"
+  tag: "staging-366791deca68330659ff6bbdcd0a928035384c55"
+  tag: "staging-366791deca68330659ff6bbdcd0a928035384c55"
+  tag: "staging-366791deca68330659ff6bbdcd0a928035384c55"
+  tag: "staging-366791deca68330659ff6bbdcd0a928035384c55"
+  tag: "staging-366791deca68330659ff6bbdcd0a928035384c55"
+  tag: "staging-366791deca68330659ff6bbdcd0a928035384c55"
+  tag: "staging-366791deca68330659ff6bbdcd0a928035384c55"
+  tag: "staging-366791deca68330659ff6bbdcd0a928035384c55"
 
   pullPolicy: IfNotPresent
 
