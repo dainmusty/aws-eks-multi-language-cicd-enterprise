@@ -28,7 +28,7 @@ Security Automation and Polyglot Microservices deployment on AWS EKS.
 * [Rollback Strategy](#rollback-strategy)
 * [Monitoring & Observability](#monitoring-&-observability)
 * [Key Features](#key-features)
-* [Architectural Decisions & Tradeoffs](#architectural-decisions-tradeoffs)
+* [Architectural Decisions & Tradeoffs](#architectural-decisions-&-tradeoffs)
 * [Learning Outcomes](#learning-outcomes)
 * [Future Enhancements](#future-enhancements)
 
