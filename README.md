@@ -9,7 +9,9 @@
 ![Prometheus](https://img.shields.io/badge/Prometheus-Monitoring-E6522C?style=for-the-badge&logo=prometheus)
 ![Grafana](https://img.shields.io/badge/Grafana-Observability-F46800?style=for-the-badge&logo=grafana)
 
-Production-style cloud-native platform demonstrating Enterprise DevOps, GitOps, Kubernetes, Infrastructure as Code, Security Automation, and Polyglot Microservices deployment on AWS EKS.
+Production-style cloud-native platform demonstrating Enterprise DevOps, GitOps, Kubernetes, Infrastructure as Code, 
+
+Security Automation and Polyglot Microservices deployment on AWS EKS.
 ---
 
 ## 📚 Table of Contents
@@ -26,6 +28,7 @@ Production-style cloud-native platform demonstrating Enterprise DevOps, GitOps, 
 * [Rollback Strategy](#rollback-strategy)
 * [Monitoring & Observability](#monitoring-&-observability)
 * [Key Features](#key-features)
+* [Architectural Decisions & Tradeoffs](#architectural-decisions-tradeoffs)
 * [Learning Outcomes](#learning-outcomes)
 * [Future Enhancements](#future-enhancements)
 
@@ -452,6 +455,95 @@ helm rollback <release> <revision>
 * Docker Image Lifecycle Management
 * Enterprise Deployment Workflows
 * Rollback Automation
+
+# Architectural Decisions & Tradeoffs
+
+## Multi-Language Microservices Architecture
+
+This project intentionally follows several enterprise design patterns that prioritize scalability, team autonomy, operational safety and GitOps-driven deployments.
+
+---
+
+The platform consists of:
+
+* React Dashboard
+* JavaScript API (Node.js / Express)
+* Java Service (Spring Boot)
+* Rust Processor (Actix Web)
+
+### Why This Approach?
+
+Large organizations rarely standardize on a single programming language. Different teams often select technologies best suited for their domain requirements.
+
+This project simulates a realistic enterprise environment where multiple development teams contribute services built with different technology stacks.
+
+### Benefits
+
+| Benefit                 | Description                                                           |
+| ----------------------- | --------------------------------------------------------------------- |
+| Team Autonomy           | Teams can choose the most appropriate language and framework.         |
+| Independent Deployments | Services can be released separately without impacting others.         |
+| Technology Diversity    | Allows evaluation of different performance and development tradeoffs. |
+| Faster CI/CD            | Only modified services are rebuilt and redeployed.                    |
+| Reduced Blast Radius    | Failures are isolated to a single service.                            |
+| Better Scalability      | Services can scale independently.                                     |
+
+### Tradeoffs
+
+| Tradeoff               | Description                                                |
+| ---------------------- | ---------------------------------------------------------- |
+| More CI Pipelines      | Each language requires dedicated build and test workflows. |
+| More Docker Images     | Additional image lifecycle management.                     |
+| Operational Complexity | Monitoring and troubleshooting become more complex.        |
+| Knowledge Requirements | Teams need expertise across multiple technologies.         |
+| Governance Overhead    | Platform standards become more important.                  |
+
+### Enterprise Mitigations
+
+* Shared GitHub Actions workflows
+* Reusable security scanning pipeline
+* Standardized Helm chart structure
+* Centralized observability platform
+* GitOps-based deployment strategy
+
+---
+
+## Per-Service Helm Chart Strategy
+
+Each microservice owns its own Helm chart.
+
+```text
+helm/
+├── javascript-api/
+├── java-service/
+├── rust-processor/
+└── react-dashboard/
+```
+
+### Benefits
+
+| Benefit               | Description                                     |
+| --------------------- | ----------------------------------------------- |
+| Independent Releases  | Services can be upgraded individually.          |
+| Independent Rollbacks | Problems can be isolated and reversed quickly.  |
+| Team Ownership        | Each team manages its own deployment lifecycle. |
+| GitOps Friendly       | ArgoCD can track services independently.        |
+| Better Scalability    | Easier to onboard new services.                 |
+
+### Tradeoffs
+
+| Tradeoff                 | Description                               |
+| ------------------------ | ----------------------------------------- |
+| More Charts              | Additional maintenance overhead.          |
+| Version Management       | Multiple chart versions must be managed.  |
+| Standardization Required | Teams must follow deployment conventions. |
+
+### Enterprise Mitigations
+
+* Shared chart templates
+* Helm linting in CI
+* ArgoCD Application management
+* Standardized deployment patterns
 
 ---
 
