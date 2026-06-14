@@ -48,6 +48,7 @@ env:
   DOCKER_REPOSITORY: dainmusty  # Docker Hub repository name
   SERVICE_PATH: polyglot-microservices/backend/javascript-api
   DOCKERFILE_PATH: polyglot-microservices/backend/javascript-api/Dockerfile
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 ############################################################
 # JOBS
