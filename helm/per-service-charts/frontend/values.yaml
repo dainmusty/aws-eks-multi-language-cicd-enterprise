@@ -29,19 +29,19 @@ image:
   repository: dainmusty/react-dashboard
 
   # Updated dynamically by GitHub Actions deploy pipeline
-  tag: "dev-220598a16c60c893eaf8e17c45f39714facf83d5"
-  tag: "dev-220598a16c60c893eaf8e17c45f39714facf83d5"
-  tag: "dev-220598a16c60c893eaf8e17c45f39714facf83d5"
-  tag: "dev-220598a16c60c893eaf8e17c45f39714facf83d5"
-  tag: "dev-220598a16c60c893eaf8e17c45f39714facf83d5"
-  tag: "dev-220598a16c60c893eaf8e17c45f39714facf83d5"
-  tag: "dev-220598a16c60c893eaf8e17c45f39714facf83d5"
-  tag: "dev-220598a16c60c893eaf8e17c45f39714facf83d5"
-  tag: "dev-220598a16c60c893eaf8e17c45f39714facf83d5"
-  tag: "dev-220598a16c60c893eaf8e17c45f39714facf83d5"
-  tag: "dev-220598a16c60c893eaf8e17c45f39714facf83d5"
-  tag: "dev-220598a16c60c893eaf8e17c45f39714facf83d5"
-  tag: "dev-220598a16c60c893eaf8e17c45f39714facf83d5"
+  tag: "dev-d3ab66cdded53213c6dbacf7c6282a1b5b6cdaeb"
+  tag: "dev-d3ab66cdded53213c6dbacf7c6282a1b5b6cdaeb"
+  tag: "dev-d3ab66cdded53213c6dbacf7c6282a1b5b6cdaeb"
+  tag: "dev-d3ab66cdded53213c6dbacf7c6282a1b5b6cdaeb"
+  tag: "dev-d3ab66cdded53213c6dbacf7c6282a1b5b6cdaeb"
+  tag: "dev-d3ab66cdded53213c6dbacf7c6282a1b5b6cdaeb"
+  tag: "dev-d3ab66cdded53213c6dbacf7c6282a1b5b6cdaeb"
+  tag: "dev-d3ab66cdded53213c6dbacf7c6282a1b5b6cdaeb"
+  tag: "dev-d3ab66cdded53213c6dbacf7c6282a1b5b6cdaeb"
+  tag: "dev-d3ab66cdded53213c6dbacf7c6282a1b5b6cdaeb"
+  tag: "dev-d3ab66cdded53213c6dbacf7c6282a1b5b6cdaeb"
+  tag: "dev-d3ab66cdded53213c6dbacf7c6282a1b5b6cdaeb"
+  tag: "dev-d3ab66cdded53213c6dbacf7c6282a1b5b6cdaeb"
 
   pullPolicy: IfNotPresent
 
