@@ -10,7 +10,6 @@
 ![Grafana](https://img.shields.io/badge/Grafana-Observability-F46800?style=for-the-badge&logo=grafana)
 
 Production-style cloud-native platform demonstrating Enterprise DevOps, GitOps, Kubernetes, Infrastructure as Code, 
-
 Security Automation and Polyglot Microservices deployment on AWS EKS.
 ---
 
@@ -173,15 +172,13 @@ All services successfully deployed and healthy in the development environment.
 
 ![Development Environment](docs/screenshots/dev-environment.png)
 
-### Staging Environment
 
-Environment promotion from Development to Staging using GitOps workflows.
-
-![Staging Environment](images/staging-environment.png)
 
 ---
 
 # CI/CD Architecture
+
+![CI/CD Pipeline Flow](docs/architecture/ci-cd-pipeline-flow.png)
 
 The platform implements service-specific CI pipelines.
 
@@ -458,12 +455,10 @@ helm rollback <release> <revision>
 
 # Architectural Decisions & Tradeoffs
 
-## Multi-Language Microservices Architecture
-
 This project intentionally follows several enterprise design patterns that prioritize scalability, team autonomy, operational safety and GitOps-driven deployments.
 
 ---
-
+## Multi-Language Microservices Architecture
 The platform consists of:
 
 * React Dashboard
