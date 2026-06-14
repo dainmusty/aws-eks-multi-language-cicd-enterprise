@@ -57,7 +57,7 @@ The project includes:
 
 # Architecture
 
-![Architecture Diagram](docs/images/architecture-diagram.png)
+![Architecture Diagram](docs/architecture/architecture-diagram.png)
 
 ```text
 Developer
