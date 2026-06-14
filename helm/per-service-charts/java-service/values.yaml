@@ -34,6 +34,9 @@ image:
   tag: "staging-5ca458bf11ab2c6bbbb348398914189a05c10d49"
   tag: "staging-5ca458bf11ab2c6bbbb348398914189a05c10d49"
   tag: "staging-5ca458bf11ab2c6bbbb348398914189a05c10d49"
+  tag: "prod-049c53b754b650f571ab414ad8845d92a482cb70"
+  tag: "prod-049c53b754b650f571ab414ad8845d92a482cb70"
+  tag: "prod-049c53b754b650f571ab414ad8845d92a482cb70"
 
   pullPolicy: IfNotPresent
 
