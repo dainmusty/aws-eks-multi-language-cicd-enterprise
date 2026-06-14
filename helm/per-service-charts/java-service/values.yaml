@@ -29,7 +29,8 @@ image:
   repository: dainmusty/java-service
 
   # Updated dynamically by GitHub Actions deploy pipeline
-  tag: "staging-10907c513e4730104b5dc1e6bd1188d4e3e883e3"
+  tag: "dev-56ec976583deef8f92c9549150db80a4c1b91a1c"
+  tag: "dev-56ec976583deef8f92c9549150db80a4c1b91a1c"
 
   pullPolicy: IfNotPresent
 

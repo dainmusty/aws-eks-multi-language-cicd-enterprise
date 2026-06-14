@@ -41,7 +41,7 @@ cargo test
 ### Docker Build
 
 ```bash
-docker build -t dainmusty/rust-processor:dev-latest2 .
+docker build -t dainmusty/rust-processor:stable .
 docker push dainmusty/rust-processor:dev-latest2
 docker run -p 8888:8888 rust-processor:1.0.0
 ```
