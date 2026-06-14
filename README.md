@@ -1,26 +1,33 @@
 # 🚀 AWS EKS Multi-Language GitOps CI/CD Enterprise Platform
 
-Production-style cloud-native platform demonstrating Enterprise DevOps, GitOps, Kubernetes, Infrastructure as Code, Security Automation, and Polyglot Microservices deployment on AWS EKS.
+![Terraform](https://img.shields.io/badge/Terraform-IaC-623CE4?style=for-the-badge&logo=terraform)
+![AWS](https://img.shields.io/badge/AWS-Cloud-FF9900?style=for-the-badge&logo=amazonaws)
+![Kubernetes](https://img.shields.io/badge/Kubernetes-EKS-326CE5?style=for-the-badge&logo=kubernetes)
+![Helm](https://img.shields.io/badge/Helm-Packaging-0F1689?style=for-the-badge&logo=helm)
+![ArgoCD](https://img.shields.io/badge/ArgoCD-GitOps-EF7B4D?style=for-the-badge)
+![GitHub Actions](https://img.shields.io/badge/GitHub-Actions-2088FF?style=for-the-badge&logo=githubactions)
+![Prometheus](https://img.shields.io/badge/Prometheus-Monitoring-E6522C?style=for-the-badge&logo=prometheus)
+![Grafana](https://img.shields.io/badge/Grafana-Observability-F46800?style=for-the-badge&logo=grafana)
 
+Production-style cloud-native platform demonstrating Enterprise DevOps, GitOps, Kubernetes, Infrastructure as Code, Security Automation, and Polyglot Microservices deployment on AWS EKS.
 ---
 
-## Table of Contents
+## 📚 Table of Contents
 
-* Overview
-* Architecture
-* Technology Stack
-* Project Structure
-* Screenshots
-* CI/CD Architecture
-* Deployment Strategies
-* Security Strategy
-* GitOps Deployment Model
-* Environment Promotion Flow
-* Rollback Strategy
-* Monitoring & Observability
-* Key Features
-* Learning Outcomes
-* Future Enhancements
+* [Overview](#Overview)
+* [Architecture](#architecture)
+* [Technology Stack](#technology-stack)
+* [Project Structure](#project-structure)
+* [Screenshots](#screenshots)
+* [CI/CD Architecture](##ci/cd-architecture)
+* [Security Strategy ](#security-strategy) 
+* [GitOps Promotion Model](#gitops-promotion-model) 
+* [Environment Promotion Flow](#environment-promotion-flow)
+* [Rollback Strategy](#rollback-strategy)
+* [Monitoring & Observability](#monitoring-&-observability)
+* [Key Features](#key-features)
+* [Learning Outcomes](#learning-outcomes)
+* [Future Enhancements](#future-enhancements)
 
 ---
 
