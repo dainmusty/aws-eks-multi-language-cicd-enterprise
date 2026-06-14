@@ -29,11 +29,11 @@ image:
   repository: dainmusty/javascript-api
 
   # Updated dynamically by GitHub Actions deploy pipeline
-  tag: "dev-b2cd9cc758da4fc0f9329534b33b47aa982e97a9"
-  tag: "dev-b2cd9cc758da4fc0f9329534b33b47aa982e97a9"
-  tag: "dev-b2cd9cc758da4fc0f9329534b33b47aa982e97a9"
-  tag: "dev-b2cd9cc758da4fc0f9329534b33b47aa982e97a9"
-  tag: "dev-b2cd9cc758da4fc0f9329534b33b47aa982e97a9"
+  tag: "dev-196cac536ca71b0a854575655df15cf77898c743"
+  tag: "dev-196cac536ca71b0a854575655df15cf77898c743"
+  tag: "dev-196cac536ca71b0a854575655df15cf77898c743"
+  tag: "dev-196cac536ca71b0a854575655df15cf77898c743"
+  tag: "dev-196cac536ca71b0a854575655df15cf77898c743"
 
   pullPolicy: IfNotPresent
 
