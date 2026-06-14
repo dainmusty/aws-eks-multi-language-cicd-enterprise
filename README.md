@@ -453,12 +453,15 @@ helm rollback <release> <revision>
 * Enterprise Deployment Workflows
 * Rollback Automation
 
+---
+
 # Architectural Decisions & Tradeoffs
 
 This project intentionally follows several enterprise design patterns that prioritize scalability, team autonomy, operational safety and GitOps-driven deployments.
 
 ---
-## Multi-Language Microservices Architecture
+
+### Multi-Language Microservices Architecture
 The platform consists of:
 
 * React Dashboard
