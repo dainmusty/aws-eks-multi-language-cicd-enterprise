@@ -20,7 +20,7 @@ Security Automation and Polyglot Microservices deployment on AWS EKS.
 * [Technology Stack](#technology-stack)
 * [Project Structure](#project-structure)
 * [Screenshots](#screenshots)
-* [CI/CD Architecture](##ci/cd-architecture)
+* [CI/CD Architecture](##cicd-architecture)
 * [Security Strategy ](#security-strategy) 
 * [GitOps Promotion Model](#gitops-promotion-model) 
 * [Environment Promotion Flow](#environment-promotion-flow)
