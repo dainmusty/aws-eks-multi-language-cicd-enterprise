@@ -11,7 +11,7 @@
 # - ECR Push
 #
 # SERVICE:
-# services/javascript-api
+# polyglot-microservices/javascript-api
 #
 # TRIGGER:
 # Runs only when JavaScript service changes.
