@@ -44,6 +44,14 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
+      # - name: Wait for approval
+      #   uses: trstringer/approval-action@v1
+      #   with:
+      #   approvers: senior-team,team-leads
+      #   minimum-approvals: 2    
+
+
+        
       #####################################################
       # Update production image tags
       #####################################################
