@@ -178,6 +178,10 @@ jobs:
           role-to-assume: arn:aws:iam::123456789012:role/github-actions-role
           aws-region: ${{ env.AWS_REGION }}
 
+
+      -name: Verify AWS identity
+       run: aws sts get-caller-identity          
+
       ######################################################
       # STEP 3 — CREATE TERRAFORM PLUGIN CACHE DIRECTORY
       ######################################################
