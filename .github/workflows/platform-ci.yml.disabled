@@ -82,6 +82,7 @@ env:
   HELM_CHART_PATH_JS: helm/per-service-charts/javascript-api-service
   HELM_CHART_PATH_JAVA: helm/per-service-charts/java-service
   HELM_CHART_PATH_RUST: helm/per-service-charts/rust-service
+  HELM_CHART_PATH_REACT: helm/per-service-charts/frontend
 
 ############################################################
 # JOBS
@@ -210,6 +211,9 @@ jobs:
       - name: Helm Lint (Rust Processor)
         run: helm lint ${{ env.HELM_CHART_PATH_RUST }}
 
+      - name: Helm Lint (React-Dashboard)
+        run: helm lint ${{ env.HELM_CHART_PATH_REACT }}        
+
       ######################################################
       # Install kubeconform (Kubernetes schema validation)
       ######################################################
@@ -235,6 +239,8 @@ jobs:
           helm template java-service ${{ env.HELM_CHART_PATH_JAVA }} | kubeconform -strict -summary
 
           helm template rust-processor ${{ env.HELM_CHART_PATH_RUST }} | kubeconform -strict -summary
+
+          helm template react-dashboard ${{ env.HELM_CHART_PATH_REACT }} | kubeconform -strict -summary
 
   ##########################################################
   # 4. GLOBAL SECURITY SCANNING

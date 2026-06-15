@@ -33,7 +33,7 @@ on:
   push:
 
     branches:
-      - develop
+      - dev
       - staging
       - main
 
@@ -105,7 +105,7 @@ jobs:
 
       rust: ${{ steps.filter.outputs.rust }}
 
-      rust: ${{ steps.filter.outputs.react }}
+      react: ${{ steps.filter.outputs.react }}
 
     steps:
 
