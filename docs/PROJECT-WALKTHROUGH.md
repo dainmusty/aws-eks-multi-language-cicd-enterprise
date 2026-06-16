@@ -271,7 +271,7 @@ Linting
 
 Deeper validation.
 
-```text
+``text
 Semgrep
 OWASP Dependency Check
 Cargo Audit
